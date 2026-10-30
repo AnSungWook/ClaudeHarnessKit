@@ -49,6 +49,12 @@ Accepted
 | `private Optional<String> memo;` | `@Nullable String memo` 또는 별도 타입, 반환 때만 `Optional` |
 | 엔티티에 `setStatus` public setter | `order.markPaid(paidAt)` 처럼 뜻 있는 메서드 |
 
+## 다른 언어에서
+
+- Kotlin: `val`, `data class`, `List`(읽기 전용). null 은 타입(`T?`)으로 표현하므로 `Optional` 대신 nullable 반환을 쓴다.
+- TypeScript: `readonly` 필드, `ReadonlyArray`, `as const`. 없음은 `undefined` 하나로 통일하고 컬렉션은 빈 배열을 돌려준다.
+- Python: `@dataclass(frozen=True)`, `tuple`, `frozenset`. 없음은 `None` 과 `Optional[T]` 타입 표시로.
+
 ## Consequences
 
 ### 긍정적

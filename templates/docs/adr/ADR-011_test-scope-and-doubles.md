@@ -53,6 +53,12 @@ Accepted
 | `assertEquals(price * qty, result)` | `assertEquals(Money.of(3000), result)` |
 | `Thread.sleep(2000)` 뒤 확인 | `await().atMost(...).until(...)` |
 
+## 다른 언어에서
+
+- 원칙(단위·통합 구분, 대역은 바깥에만, 리터럴 기대값, sleep 금지)은 같다.
+- TypeScript: Jest·Vitest 의 단위 테스트는 앱 부팅 없이, 시각은 가짜 타이머나 주입한 시계로.
+- Python: pytest 단위 테스트는 앱·DB 없이, 통합은 컨테이너(testcontainers-python 등)로.
+
 ## Consequences
 
 ### 긍정적

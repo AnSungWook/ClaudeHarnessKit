@@ -52,6 +52,12 @@ Accepted
 | `application.yml` 에 `password: admin123` 커밋 | `${DB_PASSWORD}` + 배포 환경에서 주입 |
 | `String key = System.getenv("API_KEY");` 를 여러 클래스에서 | 설정 record 한 곳에서 받고 검증 |
 
+## 다른 언어에서
+
+- 원칙(경계에서 검증, 바인딩, 오류에 내부 정보 금지, 비밀값은 설정 한 곳)은 같다.
+- TypeScript: 요청은 스키마(zod, class-validator)로 검증, ORM·쿼리 빌더의 매개변수 바인딩.
+- Python: pydantic 모델로 요청 검증, DB 드라이버·ORM 의 매개변수 바인딩.
+
 ## Consequences
 
 ### 긍정적

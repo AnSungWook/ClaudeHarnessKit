@@ -51,6 +51,13 @@ Accepted
 | `Instant.now()` | 주입받은 `Clock` 의 `clock.instant()` |
 | 판정 문턱을 관리자 설정 칸으로 노출 | 이름 붙은 코드 상수, 바꿀 때는 커밋으로 |
 
+## 다른 언어에서
+
+- 원칙(값의 정본은 한 자리, 설정은 타입 있는 객체로, 시각은 주입)은 같다. `@Value`, `@ConfigurationProperties` 는 Spring 의 예다.
+- Kotlin: `@ConfigurationProperties` + `data class`, 또는 같은 원칙의 설정 객체.
+- TypeScript(Node): 환경변수는 한 모듈에서 스키마(zod 등)로 읽고 검증해 타입 있는 객체로 내보낸다. 코드값은 `enum` 이나 `as const` 유니온. 시각은 `Clock` 같은 인터페이스를 주입.
+- Python: pydantic `BaseSettings` 같은 설정 객체 하나, 코드값은 `Enum`, 시각은 주입한 함수·객체.
+
 ## Consequences
 
 ### 긍정적

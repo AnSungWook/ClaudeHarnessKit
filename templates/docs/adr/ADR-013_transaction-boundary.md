@@ -46,6 +46,12 @@ Accepted
 | 트랜잭션 안에서 메시지를 바로 발행 | 커밋 뒤 이벤트 리스너나 아웃박스 |
 | `this.saveInternal()` 에 `@Transactional` 을 기대 | 경계를 바깥 메서드에 두거나 빈을 나눈다 |
 
+## 다른 언어에서
+
+- 원칙(업무 단위 하나가 트랜잭션, 그 안에서 바깥 호출 금지)은 같다. `@Transactional` 은 Spring 의 예다.
+- TypeScript: ORM 의 트랜잭션 블록(`prisma.$transaction`, TypeORM `transaction`)을 응용 서비스에서만 연다.
+- Python: `with session.begin():` 같은 트랜잭션 블록을 응용 서비스에서만 연다.
+
 ## Consequences
 
 ### 긍정적

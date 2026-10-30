@@ -63,6 +63,12 @@ return OrderResult.of(order, payment, clock);
 | 엔티티의 `toResponse()` | 응답 타입의 `of(entity)` - 엔티티가 화면을 모르게 |
 | 인자 수만 줄이려는 값 없는 묶음 record | 판단·계산을 함께 가진 업무 단위 record |
 
+## 다른 언어에서
+
+- Kotlin: `data class` + `companion object` 의 `of(...)`. 판단 없는 팩토리는 기본 생성자로 충분하다.
+- TypeScript: 클래스의 `static of(source)` 또는 같은 모듈의 생성 함수(`createOrderResult(order, payment)`). 객체 리터럴을 서비스에서 직접 조립하지 않는다.
+- Python: `@classmethod def of(cls, source)` 또는 `@dataclass(frozen=True)` + 생성 함수. 생성 검사는 `__post_init__`.
+
 ## Consequences
 
 ### 긍정적

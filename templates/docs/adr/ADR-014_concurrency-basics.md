@@ -46,6 +46,13 @@ Accepted
 | `catch (InterruptedException e) {}` | `Thread.currentThread().interrupt();` 후 끝내거나 던진다 |
 | 시간 제한 없는 HTTP 호출 | 연결·읽기 시간 제한 설정 |
 
+## 다른 언어에서
+
+- 원칙(공유 가변 상태 금지, 동시 실행 수 상한, 취소 신호 전파, 시간 제한)은 같다.
+- Kotlin: 코루틴은 구조화된 동시성(정해진 스코프·디스패처), `CancellationException` 을 삼키지 않는다.
+- TypeScript(Node): 단일 스레드라도 동시 요청 수에 상한(p-limit 등)을 두고, `AbortController` 로 취소·시간 제한을 넘긴다. 모듈 전역 가변 상태를 요청 사이에 공유하지 않는다.
+- Python: asyncio 는 세마포어로 상한, `CancelledError` 를 삼키지 않는다. 스레드 풀은 `max_workers` 를 정한다.
+
 ## Consequences
 
 ### 긍정적

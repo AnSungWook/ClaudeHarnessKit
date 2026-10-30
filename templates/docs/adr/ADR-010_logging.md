@@ -55,6 +55,12 @@ Accepted
 | `log.debug("request={}", requestBody)` 에 토큰 포함 | 식별자만, 민감 칸은 가린다 |
 | `e.printStackTrace()` | `log.error("...: key={}", key, e)` 를 경계에서 |
 
+## 다른 언어에서
+
+- 원칙(수준의 뜻, 한 번만, 민감 정보 금지, 구조화된 메시지)은 같다.
+- TypeScript(Node): pino·winston 같은 구조화 로거, `console.log` 금지.
+- Python: `logging` 모듈과 `logger.info("... %s", value)` 꼴, `print` 금지.
+
 ## Consequences
 
 ### 긍정적
