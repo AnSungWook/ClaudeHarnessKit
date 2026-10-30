@@ -16,7 +16,7 @@ ADR(Architecture Decision Record)은 **왜 이 결정을 했는가**를 기록�
 ## 기본 ADR (공통 코드 설계)
 
 어느 프로젝트에서나 공통으로 쓰는 코드 설계 결정이다. 설치하면 같이 들어오고, 프로젝트 사정에 맞지 않으면 Status 를 `Deprecated` 로 바꾸거나 이유를 적고 고친다.
-프로젝트마다 다른 결정(DB 접근 방식, 배포, 외부 연동 등)은 `ADR-010` 부터 이어서 쓴다.
+프로젝트마다 다른 결정(DB 접근 방식, 배포, 외부 연동 등)은 `ADR-015` 부터 이어서 쓴다.
 
 | ADR | 결정 |
 |---|---|
@@ -29,6 +29,11 @@ ADR(Architecture Decision Record)은 **왜 이 결정을 했는가**를 기록�
 | [ADR-007](ADR-007_constructor-injection.md) | 의존은 생성자로 받고 final 로 둔다 |
 | [ADR-008](ADR-008_immutability-first.md) | 불변을 먼저 쓴다 - record, 불변 컬렉션, `Optional` 은 반환값에만 |
 | [ADR-009](ADR-009_comments-explain-why.md) | 주석은 왜를 적는다 |
+| [ADR-010](ADR-010_logging.md) | 로그는 수준을 뜻대로 쓰고, 예외는 경계에서 한 번만, 비밀값·개인정보는 남기지 않는다 |
+| [ADR-011](ADR-011_test-scope-and-doubles.md) | 테스트는 단위·통합으로 나누고, 테스트 더블은 바깥 의존에만 쓴다 |
+| [ADR-012](ADR-012_input-validation-and-secrets.md) | 입력은 경계에서 검증하고, 내부 정보와 비밀값은 밖으로 내지 않는다 |
+| [ADR-013](ADR-013_transaction-boundary.md) | 트랜잭션은 응용 서비스에 두고, 그 안에서 바깥을 부르지 않는다 |
+| [ADR-014](ADR-014_concurrency-basics.md) | 공유 상태를 두지 않고, 스레드는 정해진 풀에서, 중단을 삼키지 않는다 |
 
 ## 파일 네이밍
 
