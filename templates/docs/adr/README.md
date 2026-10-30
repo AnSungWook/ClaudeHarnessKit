@@ -16,7 +16,7 @@ ADR(Architecture Decision Record)은 **왜 이 결정을 했는가**를 기록�
 ## 기본 ADR (공통 코드 설계)
 
 어느 프로젝트에서나 공통으로 쓰는 코드 설계 결정이다. 설치하면 같이 들어오고, 프로젝트 사정에 맞지 않으면 Status 를 `Deprecated` 로 바꾸거나 이유를 적고 고친다.
-프로젝트마다 다른 결정(DB 접근 방식, 배포, 외부 연동 등)은 `ADR-016` 부터 이어서 쓴다.
+프로젝트마다 다른 결정(DB 접근 방식, 배포, 외부 연동 등)은 `ADR-017` 부터 이어서 쓴다.
 
 - **원칙은 언어와 무관하고, 본문 예시는 Java/Spring 이다.** 각 ADR 의 「다른 언어에서」 절이 Kotlin, TypeScript, Python 에서 같은 원칙을 어떻게 적용하는지 적는다. `@Value`, `@Transactional` 같은 이름은 그 원칙의 Spring 쪽 예다.
 - **ADR-001(Mapper 대신 `of(원본)`)과 ADR-004(헥사고날)는 여러 선택지 중 하나를 고른 결정이다.** 근거는 각 ADR 에 있고, 프로젝트 규모나 팀 관례에 더 맞는 방식이 있으면 그 ADR 을 고쳐 바꾼다.
@@ -38,6 +38,7 @@ ADR(Architecture Decision Record)은 **왜 이 결정을 했는가**를 기록�
 | [ADR-013](ADR-013_transaction-boundary.md) | 트랜잭션은 응용 서비스에 두고, 그 안에서 바깥을 부르지 않는다 |
 | [ADR-014](ADR-014_concurrency-basics.md) | 공유 상태를 두지 않고, 스레드는 정해진 풀에서, 중단을 삼키지 않는다 |
 | [ADR-015](ADR-015_naming.md) | 이름은 뜻을 드러내고(Manager·Util 금지, 약어 금지), 업무 용어 하나로 통일한다 |
+| [ADR-016](ADR-016_package-structure.md) | 패키지는 기능별로 나누고 그 안은 성격별 폴더(`domain`, `application/port`, `application/service`, `adapter/in`, `adapter/out`, `config`)로 고정한다. 리팩토링 범위에 패키지 정렬이 기본으로 들어간다 |
 
 ## 파일 네이밍
 
