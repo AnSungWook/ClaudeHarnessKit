@@ -57,6 +57,12 @@ Accepted
 | 서비스가 `new FileStorageAdapter()` | 설정 층이 어댑터를 골라 주입 |
 | 포트를 메서드마다 하나씩 늘림 | 바깥과의 새 약속이 생길 때만 포트를 늘린다 |
 
+## 다른 언어에서
+
+- 층과 의존 방향은 언어와 무관하다. 폴더 이름은 그 생태계 관례를 따르되 역할 대응표를 둔다.
+- TypeScript(NestJS 등): 모듈 안에서 도메인·포트(인터페이스)·어댑터를 나누고, 도메인이 ORM 엔티티·HTTP 타입을 import 하지 않게 한다(dependency-cruiser 같은 도구로 검사 가능).
+- Python: 패키지로 층을 나누고, 도메인이 프레임워크(FastAPI, SQLAlchemy 모델)를 import 하지 않게 한다(import-linter 로 검사 가능).
+
 ## Consequences
 
 ### 긍정적

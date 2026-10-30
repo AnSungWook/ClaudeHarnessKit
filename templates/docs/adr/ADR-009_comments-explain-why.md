@@ -47,6 +47,10 @@ Accepted
 | 아무 설명 없는 `Thread.sleep(500)` | `// 외부 API 가 초당 2건 제한이라 간격을 둔다` |
 | `// TODO 고칠 것` | `// TODO 재시도 상한을 설정으로 - 운영 값 확정 뒤(#123)` |
 
+## 다른 언어에서
+
+- 원칙은 언어와 무관하다. 문서 주석 형식만 다르다(KDoc, TSDoc, docstring).
+
 ## Consequences
 
 ### 긍정적

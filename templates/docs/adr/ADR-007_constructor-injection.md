@@ -43,6 +43,12 @@ Accepted
 | 순환 의존을 `@Lazy` 나 setter 로 우회 | 포트를 나누거나 흐름을 바꿔 순환을 없앤다 |
 | 생성자 인자 10개를 그대로 둠 | 책임을 나눠 클래스를 쪼갠다 |
 
+## 다른 언어에서
+
+- Kotlin: 주 생성자의 `private val` 로 받는다.
+- TypeScript(NestJS, Angular): 생성자 주입 + `private readonly`. 프레임워크 없는 코드는 생성자·함수 인자로 받는다.
+- Python: `__init__` 인자로 받는다(FastAPI 의 `Depends` 도 같은 원칙). 모듈 전역 싱글턴을 직접 import 해 쓰지 않는다.
+
 ## Consequences
 
 ### 긍정적

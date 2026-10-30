@@ -44,6 +44,13 @@ Accepted
 | 이름 변경과 Reformat 을 한 커밋에 | 이름 변경 커밋, Reformat 커밋을 나눈다 |
 | AI 가 파일을 다시 쓰며 들여쓰기·줄바꿈을 바꿈 | 편집한 줄만 바꾸도록 지시 |
 
+## 다른 언어에서
+
+- 원칙(저장소에 커밋한 스타일을 따르고, 바꾼 줄만 정리, 와일드카드 import 금지)은 같다. 도구만 다르다.
+- TypeScript: `.editorconfig` + Prettier·ESLint 설정을 커밋. `import * as x` 를 남발하지 않는다.
+- Python: `pyproject.toml` 의 ruff/black 설정을 커밋. `from x import *` 금지.
+- 저장소 전체 포맷은 따로 한 번, 별도 커밋으로.
+
 ## Consequences
 
 ### 긍정적

@@ -55,6 +55,12 @@ Accepted
 | 체크 예외 `throws OrderException` 를 계층마다 전파 | 언체크 사유 예외, 경계에서만 잡기 |
 | 중간 계층에서 `catch (Exception e) { log.warn(...) }` | 경계까지 올려 거기서 응답·실패 결과로 |
 
+## 다른 언어에서
+
+- Kotlin: Java 와 같다(체크 예외가 없으니 사유 예외 클래스만).
+- TypeScript: `Error` 를 상속한 사유 클래스(`class OrderAlreadyPaidError extends Error`). 예상되는 실패가 많은 흐름은 결과 타입(`Result`)을 써도 되지만, 그때도 실패 종류는 타입으로 구분한다.
+- Python: `Exception` 을 상속한 사유 예외. 맨 `except:`, `except Exception: pass` 금지는 같다.
+
 ## Consequences
 
 ### 긍정적
