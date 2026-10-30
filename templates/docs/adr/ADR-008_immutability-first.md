@@ -26,6 +26,7 @@ Accepted
 - 컬렉션은 불변으로 만들고 돌려준다(`List.of`, `List.copyOf`, `stream().toList()`). 받은 컬렉션을 고치지 않는다 - 필요하면 복사해서 고친다.
 - record 가 가변 컬렉션을 받으면 생성자에서 `List.copyOf` 로 방어 복사한다.
 - `Optional` 은 메서드 반환값에만 쓴다. 필드·매개변수·컬렉션 원소로 쓰지 않는다.
+- 없음을 `null` 로 돌려주지 않는다. 컬렉션은 빈 컬렉션을, 하나짜리는 `Optional` 을 돌려준다. `Optional.get()` 대신 `orElseThrow(사유 예외)` 나 `orElse` 를 쓴다.
 - 예외: JPA 엔티티 같은 프레임워크 가변 타입. 상태 변경은 이름 있는 메서드(`order.cancel()`)로만 하고 public setter 는 두지 않는다.
 
 ### 체크리스트
@@ -35,6 +36,8 @@ Accepted
 - [ ] 돌려주는 컬렉션이 불변이다
 - [ ] 매개변수로 받은 컬렉션을 직접 고치지 않는다
 - [ ] `Optional` 이 필드·매개변수에 없다
+- [ ] 컬렉션을 돌려주는 메서드가 `null` 을 돌려주지 않는다
+- [ ] `Optional.get()` 이 없다
 
 ### 안티패턴
 
