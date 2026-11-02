@@ -26,7 +26,8 @@ Accepted
 - 꼭 공유해야 하는 상태는 원자 타입·동시성 컬렉션·잠금으로 다루고, 그 이유를 주석으로 남긴다(ADR-009).
 - `@Async`, `CompletableFuture.supplyAsync` 는 크기와 큐 상한이 정해진 실행기를 넘겨 쓴다. 기본 실행기·공용 풀에 맡기지 않는다.
 - `InterruptedException` 을 잡으면 중단 표시를 되살리고(`Thread.currentThread().interrupt()`) 작업을 끝내거나 사유 예외로 바꿔 던진다. 삼키지 않는다(ADR-005).
-- 바깥 호출에는 시간 제한을 둔다. 제한 없는 대기는 스레드를 묶는다.
+- 바깥 호출에는 시간 제한을 둔다. 제한 없는 대기는 스레드를 묶는다(HTTP 는 ADR-017).
+- `synchronized` 안에서 블로킹 I/O(파일, DB, 네트워크)를 하지 않는다. Java 21 가상 스레드가 그 자리에 묶인다(pinning). 그런 자리의 잠금은 `ReentrantLock` 으로 한다.
 
 ### 체크리스트
 
@@ -35,6 +36,7 @@ Accepted
 - [ ] `InterruptedException` 을 잡고 아무것도 안 하는 `catch` 가 없다
 - [ ] 공유 상태에 원자 타입·잠금과 이유 주석이 있다
 - [ ] 바깥 호출에 시간 제한이 있다
+- [ ] `synchronized` 블록 안에 파일, DB, 네트워크 호출이 없다
 
 ### 안티패턴
 
@@ -45,6 +47,7 @@ Accepted
 | `@Async` 를 기본 실행기로 | 크기·큐 상한을 정한 실행기 빈을 지정 |
 | `catch (InterruptedException e) {}` | `Thread.currentThread().interrupt();` 후 끝내거나 던진다 |
 | 시간 제한 없는 HTTP 호출 | 연결·읽기 시간 제한 설정 |
+| `synchronized (this) { Files.write(...); }` | `lock.lock(); try { Files.write(...); } finally { lock.unlock(); }` |
 
 ## 다른 언어에서
 
