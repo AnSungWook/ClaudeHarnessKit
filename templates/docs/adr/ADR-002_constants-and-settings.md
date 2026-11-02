@@ -24,8 +24,17 @@ Accepted
 
 - 저장 경로·키는 한 클래스(예: `StorageKeys`)가 만들고 해석한다. 해석이 필요한 키는 값 객체로.
 - 코드값은 enum. 사용 여부 `"Y"`/`"N"` 같은 문자열은 그 enum(예: `UseYn`) 밖에서 쓰지 않는다. 외부 JSON 칸은 문자열 그대로 두고 비교만 enum 으로.
-- 운영값은 `@ConfigurationProperties` record(또는 언어별 타입 있는 설정 객체)에, 기본값은 한 곳에. `@Value` 를 쓰지 않는다.
+- 운영값은 `@ConfigurationProperties` record(생성자 바인딩, 또는 언어별 타입 있는 불변 설정 객체)에, 기본값은 한 곳에. `@Value` 를 쓰지 않는다. 설정 바인딩 클래스에도 setter 를 두지 않는다(ADR-008).
 - 범위 밖 설정값은 기동 때 막는다(검증 실패로 앱이 안 뜨게). 기동 때 설정 요약을 로그 한 덩이로 남긴다.
+- 설정 파일은 이렇게 놓는다.
+  - 기본 파일(`application.yaml`, 모듈 조각 `application-<모듈>.yaml`)이 운영 값 겸 공통 값을 든다. 환경마다 다른 값만 환경 파일(`application-{env}.yaml`)이 덮는다. 운영 전용 파일은 따로 두지 않는다 - 기본 파일이 운영 값이다.
+  - 한 파일 안을 `---` 와 `spring.config.activate.on-profile` 로 나누지 않는다. 환경마다 파일 하나다.
+  - 기본 프로파일은 `local` 이다(`spring.profiles.active: local`). 배포는 환경변수(`SPRING_PROFILES_ACTIVE`)로 환경을 준다. 프로파일을 빠뜨린 기동이 운영 주소로 나가지 않게 하려는 것이다.
+  - 프로파일 이름은 `local`, `dev`, `stg`, `prd`, `test` 처럼 저장소에서 하나로 정해 쓴다. 개인 덮어쓰기 파일(`application-local-mine.yaml` 등)은 gitignore 한다.
+  - `local` 과 `test` 환경 파일은 바깥으로 나가는 주소(DB, 바깥 API, 버킷, 파일 서버)를 모두 덮는다. 안 덮으면 기본 파일의 운영 값으로 나간다.
+- 비밀값(비밀번호, 키, 토큰)만 환경변수 `${ENV}` 로 받고 기본값을 두지 않는다(ADR-012). 값이 비었거나 `${` 로 시작하는 글자가 그대로 남았으면 기동을 막는다 - Spring 은 환경변수가 없으면 `${X}` 글자를 그대로 칸에 넣기 때문에, 기본값만 걷으면 그 글자가 비밀값으로 쓰인다.
+- 호스트, 포트, 버킷, 도메인 같은 일반 값은 yaml 에 값으로 적는다. `${X:기본}` 모양은 쓰지 않는다 - 환경마다 무엇이 다른지가 저장소에서 보이게 한다. 저장소 설정에 절대 경로(`/Users/...`, `C:\...`)를 쓰지 않는다.
+- 코드에서 프로파일 이름으로 갈라 동작하지 않는다(`Environment.getActiveProfiles()`, `acceptsProfiles`). 갈라야 하면 `@Profile` 이나 환경 파일의 값으로 가른다.
 - 같은 뜻의 설정은 정본이 하나. 프레임워크가 이미 가진 키와 같은 뜻의 자체 프로퍼티를 만들지 않는다.
 - 현재 시각은 주입한 `Clock` 에서만 얻는다. `now()` 를 직접 부르지 않는다.
 - 페이징, JSON 읽기·쓰기 같은 공통 도우미는 하나씩만 둔다.
@@ -39,6 +48,11 @@ Accepted
 - [ ] 설정 기본값이 한 곳에만 있다
 - [ ] `LocalDateTime.now()`, `Instant.now()` 등 직접 호출이 없다(테스트 제외)
 - [ ] 범위 밖 설정이 기동 때 실패한다
+- [ ] 설정 바인딩 클래스가 record(생성자 바인딩)이고 setter 가 없다
+- [ ] yaml 에 `${X:기본}` 모양이 없고, 비밀값 `${X}` 는 빈 값과 `${` 글자를 기동 때 막는다
+- [ ] 한 파일 안에 `---` + `on-profile` 이 없고, 운영 전용 `-prd` 파일이 없다
+- [ ] 기본 프로파일이 `local` 이고 `local`, `test` 환경 파일이 바깥 주소를 모두 덮는다
+- [ ] 코드에 `getActiveProfiles()`, `acceptsProfiles` 분기가 없다
 
 ### 안티패턴
 
@@ -50,6 +64,10 @@ Accepted
 | 상수 클래스 하나에 문자열만 몰아넣기 | 만드는 규칙(조립)과 해석까지 가진 타입 |
 | `Instant.now()` | 주입받은 `Clock` 의 `clock.instant()` |
 | 판정 문턱을 관리자 설정 칸으로 노출 | 이름 붙은 코드 상수, 바꿀 때는 커밋으로 |
+| `url: ${DB_URL:jdbc:postgresql://localhost:5432/app}` | 기본 파일에 운영 주소, `application-local.yaml` 에 로컬 주소를 값으로 |
+| `password: ${DB_PASSWORD:}`(빈 기본값) | `password: ${DB_PASSWORD}` + 빈 값과 `${` 글자를 막는 기동 검사 |
+| `if (env.acceptsProfiles("local")) skipAuth()` | 환경 파일의 `auth.enabled: false` 같은 키 |
+| 설정 클래스에 `@Setter` | record 생성자 바인딩 |
 
 ## 다른 언어에서
 
@@ -66,7 +84,8 @@ Accepted
 
 ### 부정적
 - 키·코드값 타입이 늘어난다.
-- 기존 JavaBean 설정을 record 로 바꾸면 그 설정을 직렬화하던 곳의 모양이 바뀔 수 있어, 옮기는 것은 새로 만드는 것부터 한다.
+- 기존 JavaBean 설정을 record 로 바꾸면 그 설정을 직렬화하던 곳의 모양이 바뀔 수 있다. 저장했다 다시 읽는 설정이면 칸 이름을 그대로 두고, 옛 저장본을 읽는 테스트를 먼저 만든 뒤 옮긴다.
+- 환경 파일이 늘고, 비밀값은 로컬에서도 환경변수나 개인 덮어쓰기 파일로 넣어야 한다.
 
 ## References
 

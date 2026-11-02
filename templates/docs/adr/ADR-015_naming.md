@@ -24,7 +24,17 @@ Accepted
 
 - 뜻을 드러낸다. 변수·필드는 담은 것(`paidAmount`), 함수·메서드는 하는 일을 동사로(`cancelOrder`, `findActiveMembers`), 타입은 무엇인지 명사로(`OrderLine`).
 - 불리언은 참·거짓으로 읽히게: `isPaid`, `hasCoupon`, `canRetry`. 부정형(`isNotValid`)은 피한다.
-- 뭉뚱그린 이름을 쓰지 않는다: `Manager`, `Helper`, `Util`, `Common`, `Processor`, `Data`, `Info`, `Handler` 를 홀로 붙인 타입. 하는 일이 하나로 말해지지 않으면 나눈다(`OrderManager` → `OrderCanceller`, `OrderPriceCalculator`).
+- 뭉뚱그린 이름을 쓰지 않는다: `Manager`, `Helper`, `Util`, `Common`, `Base`, `Processor`, `Data`, `Info`, `Handler`, `Dto`, `Vo` 를 끝에 붙인 타입. 하는 일이 하나로 말해지지 않으면 나눈다(`OrderManager` → `OrderCanceller`, `OrderPriceCalculator`). 이름의 끝 단어만 본다(`BaseEntity` 는 끝이 `Entity` 라 된다).
+  - 예외: 프레임워크 계약을 구현하는 타입은 그 계약 이름을 쓴다. `Processor` 는 배치 `ItemProcessor` 구현, `Handler` 는 프레임워크가 부르는 콜백 구현(예외 처리기 등)만 된다.
+- 층 사이를 오가는 값은 용도를 이름에 단다: API 요청 `XxxRequest`, API 응답 `XxxResponse`, 쓰기 입력 `XxxCommand`, 조회 조건 `XxxCondition`, API 로 나가지 않는 서비스 반환값 `XxxResult`.
+- 서비스 빈(`@Service`)은 `Service` 로 끝난다. 유스케이스 서비스는 업무 이름(`{대상}{업무}Service`)이고, 집합 하나의 쓰기와 읽기를 나누면 `XxxCommandService`, `XxxQueryService` 다.
+- 메서드 동사가 층과 없을 때의 결과를 말한다.
+  - 저장소 포트의 읽기는 `find` 다. 없을 수 있으면 `Optional` 이나 빈 컬렉션을 돌려준다(ADR-008).
+  - 서비스의 읽기는 `get` 이다. 없으면 사유 예외를 던진다(ADR-005). 이름만 보고 없을 때 무엇이 오는지 안다.
+  - 쓰기는 `save`, `update`, `delete` 다. 상태를 바꾸는 업무 동작은 엔티티의 뜻 있는 메서드다(`order.cancel()`).
+  - 조건 객체를 받으면 `...By` 로 끝난다(`findAllBy(condition)`).
+  - 바깥 호출을 감싸 실패를 값이나 사유 예외로 바꾸는 메서드는 `try` 로 시작한다.
+  - Spring Data 리포지토리 인터페이스의 메서드는 그 문법을 따르고 위 규칙 밖이다.
 - 약어를 만들지 않는다. 누구나 아는 것(`id`, `url`, `http`)만 쓴다. 한 글자 이름은 짧은 반복 변수(`i`)와 람다 인자 정도에만.
 - 업무 용어를 하나로 통일한다(유비쿼터스 언어). 같은 개념을 화면·코드·DB·문서에서 같은 낱말로 부르고, 프로젝트 용어집(`docs/` 아래)에 적는다. 다른 개념에는 다른 낱말을 쓴다.
 - 이름에 타입이나 구현을 넣지 않는다: `orderList` 보다 `orders`, `strName` 보다 `name`, `IOrderRepository`/`OrderRepositoryImpl` 같은 접두·접미어 대신 역할 이름(`JpaOrderRepository`).
@@ -35,7 +45,10 @@ Accepted
 ### 체크리스트
 
 - [ ] `data`, `info`, `temp`, `obj`, `tmp` 같은 뜻 없는 변수·필드 이름이 없다
-- [ ] `Manager`/`Helper`/`Util`/`Common` 을 홀로 붙인 새 타입이 없다
+- [ ] `Manager`/`Helper`/`Util`/`Common`/`Base`/`Data`/`Info`/`Dto`/`Vo` 로 끝나는 새 타입이 없다(`Processor`, `Handler` 는 프레임워크 계약 구현만)
+- [ ] 층 사이 값이 `Request`/`Response`/`Command`/`Condition`/`Result` 로 용도를 말한다
+- [ ] `@Service` 클래스가 `Service` 로 끝난다
+- [ ] 포트 읽기는 `find`(Optional, 빈 컬렉션), 서비스 읽기는 `get`(없으면 사유 예외)이다
 - [ ] 불리언이 `is`/`has`/`can` 꼴로 읽힌다
 - [ ] 새로 만든 약어가 없다
 - [ ] 같은 개념에 두 낱말을 쓰지 않는다(용어집과 맞다)
@@ -51,6 +64,9 @@ Accepted
 | `ordAmt`, `usrNm` | `orderAmount`, `userName` |
 | 화면은 "회원", 코드는 `User`, DB 는 `customer` | 한 낱말로 통일하고 용어집에 적는다 |
 | `List<Order> orderList`, `OrderServiceImpl` | `orders`, 역할이 드러나는 구현 이름 |
+| `OrderDto` 하나를 요청, 응답, 서비스 반환에 같이 씀 | `OrderCreateRequest`, `OrderResponse`, `OrderCreateResult` |
+| `@Service class OrderOrchestrator` | `@Service class OrderPlacementService` |
+| 서비스의 `findOrder(id)` 가 없으면 `null` | 서비스는 `getOrder(id)` 가 없으면 `OrderNotFoundException`, 포트는 `findById(id)` 가 `Optional` |
 
 ## 다른 언어에서
 
