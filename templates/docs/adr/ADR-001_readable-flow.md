@@ -28,7 +28,9 @@ Accepted
 - 이름은 그 단계가 흐름에서 맡은 일을 말한다. 구현 수단(`run`, `handle`, `process`, `execute`, `holding`, `claim`, `stream`, `relay`)만 말하는 이름으로 흐름의 단계를 나타내지 않는다.
   - 예: `claim()` 대신 `markRunningOrReject()`, `stream(run, response)` 대신 `runJobAndWriteProgress(...)`, `Slot` 대신 `JobRunningFlag`.
 - 위임하는 클래스나 메서드는 둬도 된다. 다만 그 이름이 위임해서 하는 일을 말해야 한다.
-- 흐름은 위에서 아래로 읽히게 한다. "할 일을 람다로 싸서 돌려주고 나중에 다른 자리에서 실행" 하는 모양은 읽는 사람이 거슬러 올라가야 하므로, 프레임워크가 요구할 때만 쓰고 그때도 이름으로 무엇을 미뤄 두는지 밝힌다.
+- 이벤트, 콜백, 함수형 파이프라인, 리액티브 체인도 쓸 수 있다. 다만 두 가지를 지킨다.
+  - **묶고 이름 붙인다.** 람다나 연산자 조각을 흩어 두지 말고 한 덩어리로 묶어, 그 덩어리가 하는 일을 이름으로 말하게 한다(예: `OrderPlacedEvent` 와 `sendReceiptOnOrderPlaced`, 파이프라인은 `filterUnpaid` → `groupByMember` → `toReminderMail`).
+  - **프로세스 흐름에서 쓰이는 자리에만 둔다.** 그 일이 실제로 일어나는 단계에서 만들고 그 단계에서 돌린다. 한 자리에서 만들어 돌려주고 위로 돌아가 다른 자리에서 실행하는 식으로, 읽는 사람이 거슬러 올라가게 하지 않는다.
 - 프레임워크의 익숙한 구조(Controller → Service, Job → Step, Listener → Handler)가 보이게 둔다. 그 구조를 아는 사람이 코드에서 그대로 찾을 수 있어야 한다.
 - 이름으로 다 말할 수 없는 이유(왜 이 순서인지, 왜 여기서 막는지)는 주석 한 줄로 적는다(ADR-010).
 
@@ -37,7 +39,8 @@ Accepted
 - [ ] 입력을 받는 자리부터 이름만 따라 읽어도 흐름을 한 문장씩 설명할 수 있다
 - [ ] 흐름의 단계를 나타내는 메서드·클래스 이름이 구현 수단이 아니라 맡은 일을 말한다
 - [ ] 위임하는 자리의 이름이 위임해서 하는 일을 말한다
-- [ ] 흐름이 위에서 아래로 읽힌다(람다로 미뤄 두는 자리는 프레임워크가 요구한 곳뿐이고, 이름이 무엇을 미루는지 말한다)
+- [ ] 이벤트, 콜백, 파이프라인은 묶여 있고 이름이 하는 일을 말한다
+- [ ] 이벤트, 콜백, 파이프라인이 프로세스 흐름에서 그 일이 일어나는 자리에만 있다(만든 자리와 실행되는 자리가 갈려 거슬러 읽게 하지 않는다)
 - [ ] 프레임워크의 익숙한 구조가 코드에서 보인다
 
 ### 안티패턴
@@ -46,7 +49,9 @@ Accepted
 |---------|-----------|
 | `stream(runs.report(key), response)` - 읽어도 무엇이 실행되는지 모른다 | `reportJobRunner.runAndWriteProgress(key, response)` 처럼 하는 일이 이름에 있다 |
 | `claim()`, `holding()`, `Slot` - 구현 수단만 말한다 | `markRunningOrReject()`, `JobRunningFlag` 처럼 흐름에서 맡은 일을 말한다 |
-| 할 일을 람다로 싸서 돌려주고, 위로 돌아가 다른 자리에서 실행 | 그 자리에서 이름 있는 메서드를 차례로 부른다 |
+| 할 일을 람다로 싸서 돌려주고, 위로 돌아가 다른 자리에서 실행 | 그 일이 일어나는 단계에서 만들고 그 자리에서 돌린다 |
+| 이름 없는 람다와 연산자가 길게 이어진 파이프라인 | 단계마다 이름 있는 메서드로 묶는다(`filterUnpaid`, `groupByMember`) |
+| 이벤트 이름이 `DataChanged`, 리스너가 `onEvent` | `OrderPlacedEvent`, `sendReceiptOnOrderPlaced` 처럼 무엇이 일어났고 무엇을 하는지 말한다 |
 | `process()`, `handle()`, `execute()` 가 층마다 이어진다 | 층마다 그 층이 하는 일을 이름으로(`validateTarget`, `startReportJob`, `writeResultLine`) |
 
 ## 다른 언어에서
