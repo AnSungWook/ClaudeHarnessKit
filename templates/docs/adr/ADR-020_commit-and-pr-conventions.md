@@ -43,7 +43,7 @@ Accepted
       orderService.placeOrder(command)
         stock.reserve(items)            재고 부족이면 OutOfStockException(409)
         orders.save(order)
-        OrderPlacedEvent 발행
+        events.publishEvent(OrderPlacedEvent.of(order))
     커밋 뒤 → receiptListener.sendReceiptOnOrderPlaced(event)   mailExecutor 에서
     ```
 - 머지 커밋 제목은 도구가 만든 그대로 둔다.
