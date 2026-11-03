@@ -16,7 +16,7 @@ ADR(Architecture Decision Record)은 **왜 이 결정을 했는가**를 기록�
 ## 기본 ADR (공통 코드 설계)
 
 어느 프로젝트에서나 공통으로 쓰는 코드 설계 결정이다. 설치하면 같이 들어오고, 프로젝트 사정에 맞지 않으면 Status 를 `Deprecated` 로 바꾸거나 이유를 적고 고친다.
-프로젝트마다 다른 결정(DB 접근 방식, 배포, 외부 연동 등)은 `ADR-023` 부터 이어서 쓴다.
+프로젝트마다 다른 결정(DB 접근 방식, 배포, 외부 연동 등)은 `ADR-024` 부터 이어서 쓴다.
 
 - **원칙은 언어와 무관하고, 본문 예시는 Java/Spring 이다.** 각 ADR 의 「다른 언어에서」 절이 Kotlin, TypeScript, Python 에서 같은 원칙을 어떻게 적용하는지 적는다. `@Value`, `@Transactional` 같은 이름은 그 원칙의 Spring 쪽 예다.
 - **아래는 여러 선택지 중 하나를 고른 결정이다.** 근거는 각 ADR 에 있고, 프로젝트 규모나 팀 관례에 더 맞는 방식이 있으면 그 ADR 을 고쳐 바꾼다. 괄호 밖의 나머지 규칙은 어디서나 그대로 쓴다.
@@ -54,6 +54,7 @@ ADR(Architecture Decision Record)은 **왜 이 결정을 했는가**를 기록�
 | [ADR-020](ADR-020_modern-language-idioms.md) | 같은 일은 최신 문법 한 모양으로 - 결과 순회는 스트림, `switch` 식은 default 없이 전부, 패턴 매칭, sealed 와 record |
 | [ADR-021](ADR-021_annotation-and-member-order.md) | 정체 어노테이션은 선언 바로 위, 멤버는 public 하나 밑에 그것이 부르는 private |
 | [ADR-022](ADR-022_http-error-boundary.md) | HTTP 오류는 처리기 한 자리가 매핑 표 하나로 상태와 본문을 정하고, 모르는 예외는 고정 문구만 낸다. 컨트롤러는 바꾸고, 한 번 부르고, 바꾼다 |
+| [ADR-023](ADR-023_readable-flow.md) | 입구에서 실제 일을 하는 클래스까지 세 번 안에 닿게 - 아는 프레임워크 모양을 드러내고, 부가 처리는 한 자리에, 흐름을 함수 객체로 숨기지 않는다 |
 
 ## 파일 네이밍
 
