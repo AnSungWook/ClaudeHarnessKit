@@ -1,4 +1,4 @@
-# ADR-012: 입력은 경계에서 검증하고, 내부 정보와 비밀값은 밖으로 내지 않는다
+# ADR-013: 입력은 경계에서 검증하고, 내부 정보와 비밀값은 밖으로 내지 않는다
 
 ## Status
 
@@ -24,16 +24,16 @@ Accepted
 
 - 입력 검증:
   - 요청은 경계(컨트롤러, 메시지 수신부)에서 요청 타입의 선언적 검증(`@Valid` + 제약 애너테이션)으로 먼저 거른다. 실패는 400 계열과 어느 칸이 왜 틀렸는지로 돌려준다.
-  - 업무 규칙 위반은 업무 사유 예외로(ADR-005). 값 객체 생성자 검사는 프로그래밍 오류 방어용이다(ADR-001).
+  - 업무 규칙 위반은 업무 사유 예외로(ADR-006). 값 객체 생성자 검사는 프로그래밍 오류 방어용이다(ADR-002).
   - 외부 시스템이 준 값도 입력이다. 어댑터에서 검사한다.
 - 주입 방지: SQL·쿼리는 매개변수 바인딩으로만 만든다. 사용자 값을 쿼리·명령·경로 문자열에 이어 붙이지 않는다.
-- 오류 노출: 클라이언트에 스택, 예외 클래스 이름, SQL, 내부 메시지를 보이지 않는다. 오류 응답은 한 모양(코드, 사람이 읽는 메시지, 추적용 ID)으로 통일하고, 자세한 것은 서버 로그에 남긴다(ADR-010).
+- 오류 노출: 클라이언트에 스택, 예외 클래스 이름, SQL, 내부 메시지를 보이지 않는다. 오류 응답은 한 모양(코드, 사람이 읽는 메시지, 추적용 ID)으로 통일하고, 자세한 것은 서버 로그에 남긴다(ADR-011).
 - 비밀값:
   - 코드, 저장소에 커밋되는 설정 파일, 테스트 고정값에 두지 않는다. 배포 환경(환경변수, 비밀 관리 서비스)에서 받는다.
-  - 받는 자리는 설정 객체 한 곳이다(ADR-002). 코드 곳곳에서 `System.getenv` 를 부르지 않는다.
-  - 필수 비밀값이 없으면 기동 때 실패한다. 기본값을 두지 않고, 빈 값과 풀리지 않은 `${...}` 글자도 막는다(ADR-002).
+  - 받는 자리는 설정 객체 한 곳이다(ADR-003). 코드 곳곳에서 `System.getenv` 를 부르지 않는다.
+  - 필수 비밀값이 없으면 기동 때 실패한다. 기본값을 두지 않고, 빈 값과 풀리지 않은 `${...}` 글자도 막는다(ADR-003).
   - 저장소에 암호화한 비밀값(`ENC(...)` 등)도 두지 않는다. 푸는 열쇠를 다시 바깥에서 받아야 해서 얻는 것이 없다.
-- 인증 자리, CORS, 운영 엔드포인트, 업로드, 리다이렉트 같은 보안 기본값은 ADR-018 이 든다.
+- 인증 자리, CORS, 운영 엔드포인트, 업로드, 리다이렉트 같은 보안 기본값은 ADR-019 이 든다.
 
 ### 체크리스트
 
@@ -73,4 +73,4 @@ Accepted
 ## References
 
 - 출처: [affaan-m/everything-claude-code rules/java/security.md](https://github.com/affaan-m/everything-claude-code/blob/main/rules/java/security.md), [affaan-m/everything-claude-code java-reviewer.md](https://github.com/affaan-m/everything-claude-code/blob/main/agents/java-reviewer.md), [github/awesome-copilot springboot.instructions.md](https://github.com/github/awesome-copilot/blob/main/instructions/springboot.instructions.md)
-- ADR-001, ADR-002, ADR-005, ADR-010
+- ADR-002, ADR-003, ADR-006, ADR-011

@@ -1,4 +1,4 @@
-# ADR-007: 의존은 생성자로 받고 final 로 둔다
+# ADR-008: 의존은 생성자로 받고 final 로 둔다
 
 ## Status
 
@@ -62,4 +62,4 @@ Accepted
 ## References
 
 - 출처: [giuseppe-trisciuoglio/developer-kit](https://github.com/giuseppe-trisciuoglio/developer-kit/tree/main/plugins/developer-kit-java), [piomin/claude-ai-spring-boot](https://github.com/piomin/claude-ai-spring-boot), [PatrickJS/awesome-cursorrules](https://github.com/PatrickJS/awesome-cursorrules/tree/main/rules)(kotlin-springboot)
-- ADR-004 헥사고날 층과 의존 방향
+- ADR-005 헥사고날 층과 의존 방향

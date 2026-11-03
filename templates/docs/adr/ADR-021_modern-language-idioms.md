@@ -1,4 +1,4 @@
-# ADR-020: 같은 일은 짧고 선언적인 최신 문법 한 모양으로 쓴다 - 스트림, switch 식, 패턴 매칭, sealed 와 record
+# ADR-021: 같은 일은 짧고 선언적인 최신 문법 한 모양으로 쓴다 - 스트림, switch 식, 패턴 매칭, sealed 와 record
 
 ## Status
 
@@ -24,8 +24,8 @@ Accepted
 
 - 결과가 나오는 컬렉션 순회는 스트림으로 쓴다(`filter`, `map`, `toList()`, `groupingBy`, `anyMatch`). `for-each` 는 자원을 닫거나, 중간에 끊거나(`break`), 두 컬렉션을 인덱스로 짝지을 때만 쓴다. 인덱스 `for` 는 배열, 문자 훑기, 수치 계산에만 쓴다.
 - 스트림 안에서 부수효과를 내지 않는다. `forEach` 로 바깥 컬렉션에 담지 않고 `collect` 나 `toList()` 로 받는다. `forEach` 는 로그나 호출처럼 결과가 없는 일에만 쓴다.
-- 컬렉션은 불변이 기본이다(ADR-008). `new ArrayList<>()` 에 쌓아 돌려주는 모양은 스트림으로 바꾼다.
-- enum 에 따른 판단은 enum 안에 둔다(ADR-002). 그 밖의 분기는 `switch` 식(`->`)이다. 문장형 `switch` 와 fallthrough 는 쓰지 않는다. enum 과 sealed 타입을 `switch` 할 때는 `default` 없이 전부 나열해 컴파일러가 빠진 가지를 잡게 한다.
+- 컬렉션은 불변이 기본이다(ADR-009). `new ArrayList<>()` 에 쌓아 돌려주는 모양은 스트림으로 바꾼다.
+- enum 에 따른 판단은 enum 안에 둔다(ADR-003). 그 밖의 분기는 `switch` 식(`->`)이다. 문장형 `switch` 와 fallthrough 는 쓰지 않는다. enum 과 sealed 타입을 `switch` 할 때는 `default` 없이 전부 나열해 컴파일러가 빠진 가지를 잡게 한다.
 - 타입 검사는 패턴 매칭으로 한다(`instanceof T t`, record 패턴, `switch` 의 타입 패턴). `instanceof` 뒤에 따로 캐스팅하지 않는다.
 - 닫힌 타입 집합(성공과 실패 같은 결과)은 `sealed interface` 와 record 로 만든다.
 - 문자열은 이렇게 쓴다.
@@ -33,9 +33,9 @@ Accepted
   - 끼워 넣기는 `.formatted()` 로 하고, 잇기는 `String.join` 이나 `Collectors.joining` 으로 한다.
   - `StringBuilder` 는 루프 안에서 많이 조립할 때만 쓴다.
   - Locale 에 따라 결과가 바뀌는 형식은 `String.format(Locale.ROOT, ...)` 로 쓴다.
-  - SQL 과 로그 문구를 `+` 로 조립하지 않는다(ADR-010, ADR-012).
+  - SQL 과 로그 문구를 `+` 로 조립하지 않는다(ADR-011, ADR-013).
 - `var` 는 오른쪽에서 타입이 바로 보일 때만 쓴다. `var order = Order.of(...)` 는 되고 `var result = service.run(x)` 는 안 된다.
-- 한 번에 저장소 전체를 바꾸지 않는다. 새 코드에 걸고, 기존 코드는 그 파일을 고칠 때 맞춘다(ADR-006).
+- 한 번에 저장소 전체를 바꾸지 않는다. 새 코드에 걸고, 기존 코드는 그 파일을 고칠 때 맞춘다(ADR-007).
 
 ### 체크리스트
 
@@ -76,4 +76,4 @@ Accepted
 
 ## References
 
-- ADR-002(enum 안의 판단), ADR-006(바꾼 줄만), ADR-008(불변), ADR-010(로그 문구), ADR-012(SQL 바인딩), ADR-014(잠금)
+- ADR-003(enum 안의 판단), ADR-007(바꾼 줄만), ADR-009(불변), ADR-011(로그 문구), ADR-013(SQL 바인딩), ADR-015(잠금)

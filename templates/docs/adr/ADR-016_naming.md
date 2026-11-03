@@ -1,4 +1,4 @@
-# ADR-015: 이름은 뜻을 드러내고, 업무 용어 하나로 통일한다
+# ADR-016: 이름은 뜻을 드러내고, 업무 용어 하나로 통일한다
 
 ## Status
 
@@ -29,8 +29,8 @@ Accepted
 - 층 사이를 오가는 값은 용도를 이름에 단다: API 요청 `XxxRequest`, API 응답 `XxxResponse`, 쓰기 입력 `XxxCommand`, 조회 조건 `XxxCondition`, API 로 나가지 않는 서비스 반환값 `XxxResult`.
 - 서비스 빈(`@Service`)은 `Service` 로 끝난다. 유스케이스 서비스는 업무 이름(`{대상}{업무}Service`)이고, 집합 하나의 쓰기와 읽기를 나누면 `XxxCommandService`, `XxxQueryService` 다.
 - 메서드 동사가 층과 없을 때의 결과를 말한다.
-  - 저장소 포트의 읽기는 `find` 다. 없을 수 있으면 `Optional` 이나 빈 컬렉션을 돌려준다(ADR-008).
-  - 서비스의 읽기는 `get` 이다. 없으면 사유 예외를 던진다(ADR-005). 이름만 보고 없을 때 무엇이 오는지 안다.
+  - 저장소 포트의 읽기는 `find` 다. 없을 수 있으면 `Optional` 이나 빈 컬렉션을 돌려준다(ADR-009).
+  - 서비스의 읽기는 `get` 이다. 없으면 사유 예외를 던진다(ADR-006). 이름만 보고 없을 때 무엇이 오는지 안다.
   - 쓰기는 `save`, `update`, `delete` 다. 상태를 바꾸는 업무 동작은 엔티티의 뜻 있는 메서드다(`order.cancel()`).
   - 조건 객체를 받으면 `...By` 로 끝난다(`findAllBy(condition)`).
   - 바깥 호출을 감싸 실패를 값이나 사유 예외로 바꾸는 메서드는 `try` 로 시작한다.
@@ -38,8 +38,8 @@ Accepted
 - 약어를 만들지 않는다. 누구나 아는 것(`id`, `url`, `http`)만 쓴다. 한 글자 이름은 짧은 반복 변수(`i`)와 람다 인자 정도에만.
 - 업무 용어를 하나로 통일한다(유비쿼터스 언어). 같은 개념을 화면·코드·DB·문서에서 같은 낱말로 부르고, 프로젝트 용어집(`docs/` 아래)에 적는다. 다른 개념에는 다른 낱말을 쓴다.
 - 이름에 타입이나 구현을 넣지 않는다: `orderList` 보다 `orders`, `strName` 보다 `name`, `IOrderRepository`/`OrderRepositoryImpl` 같은 접두·접미어 대신 역할 이름(`JpaOrderRepository`).
-- 숫자 상수에는 뜻 있는 이름을 붙인다(ADR-002).
-- 테스트 이름은 무엇을 확인하는지 말한다(ADR-011).
+- 숫자 상수에는 뜻 있는 이름을 붙인다(ADR-003).
+- 테스트 이름은 무엇을 확인하는지 말한다(ADR-012).
 - 대소문자 표기와 파일 이름 규칙은 그 언어·프레임워크의 관례를 따른다.
 
 ### 체크리스트
@@ -82,9 +82,9 @@ Accepted
 
 ### 부정적
 - 이름을 짓는 데 시간이 더 든다.
-- 기존 이름을 바꾸면 diff 가 커져, 바꾼 줄부터 맞춰 간다(ADR-006).
+- 기존 이름을 바꾸면 diff 가 커져, 바꾼 줄부터 맞춰 간다(ADR-007).
 
 ## References
 
 - 출처: [affaan-m/everything-claude-code rules/common/coding-style.md](https://github.com/affaan-m/everything-claude-code/blob/main/rules/common/coding-style.md)(Naming Conventions), [PatrickJS/awesome-cursorrules rules/clean-code.mdc](https://github.com/PatrickJS/awesome-cursorrules/blob/main/rules/clean-code.mdc)(Meaningful Names), [github/awesome-copilot code-review-generic.instructions.md](https://github.com/github/awesome-copilot/blob/main/instructions/code-review-generic.instructions.md)
-- ADR-002(상수 이름), ADR-006(바꾼 줄만), ADR-011(테스트 이름)
+- ADR-003(상수 이름), ADR-007(바꾼 줄만), ADR-012(테스트 이름)
