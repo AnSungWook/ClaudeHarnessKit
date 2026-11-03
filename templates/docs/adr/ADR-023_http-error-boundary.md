@@ -1,4 +1,4 @@
-# ADR-022: HTTP 오류는 처리기 한 자리가 매핑 표 하나로 바꾸고, 컨트롤러는 바꾸고 부르고 바꾸기만 한다
+# ADR-023: HTTP 오류는 처리기 한 자리가 매핑 표 하나로 바꾸고, 컨트롤러는 바꾸고 부르고 바꾸기만 한다
 
 ## Status
 
@@ -22,14 +22,14 @@ Accepted
 
 **사유 예외를 HTTP 상태와 본문으로 바꾸는 일은 공통 처리기 한 자리가 아래 표 하나로 한다.**
 
-- 오류 본문은 공통 응답 본문 하나다(예: `CommonResponse`, 오류는 `error{errorCode, errorMessage}`, 칸 검증은 `errors[]{field, reason}`). 성공 응답도 같은 본문으로 감싼다. `errorCode`, `errorMessage` 는 사유 예외가 든 ErrorCode 의 `getCode()`, `getMessage()` 다(ADR-005).
-- 모듈은 자기 사유 예외를 공통 형제(ADR-005)에 붙여 매핑을 얻는다. 모듈마다 처리기를 따로 두지 않는다.
+- 오류 본문은 공통 응답 본문 하나다(예: `CommonResponse`, 오류는 `error{errorCode, errorMessage}`, 칸 검증은 `errors[]{field, reason}`). 성공 응답도 같은 본문으로 감싼다. `errorCode`, `errorMessage` 는 사유 예외가 든 ErrorCode 의 `getCode()`, `getMessage()` 다(ADR-006).
+- 모듈은 자기 사유 예외를 공통 형제(ADR-006)에 붙여 매핑을 얻는다. 모듈마다 처리기를 따로 두지 않는다.
 - 매핑은 이 표 하나다.
 
   | 예외 | 상태 | 본문 | 로그 |
   |---|---|---|---|
   | 요청 칸 검증(바인딩, 메서드 검증, 빠진 인자와 헤더, 못 읽는 본문, 타입이 안 맞는 값, 모르는 코드값), `InvalidValueException` | 400 | `errors[]`(칸, 사유) | WARN |
-  | `IllegalArgumentException`(값 객체 생성자의 검증, ADR-001) | 400 | 고정 code `INVALID_VALUE` 와 고정 문구. 예외 문구는 싣지 않는다 | WARN(예외 문구) |
+  | `IllegalArgumentException`(값 객체 생성자의 검증, ADR-002) | 400 | 고정 code `INVALID_VALUE` 와 고정 문구. 예외 문구는 싣지 않는다 | WARN(예외 문구) |
   | `ForbiddenException` | 403 | `error` | WARN |
   | `NotFoundException` | 404 | `error` | WARN |
   | `ConflictException`(중복과 상태 충돌) | 409 | `error` | WARN |
@@ -38,14 +38,14 @@ Accepted
   | 그 밖 전부 | 500 | 고정 code, 고정 문구 | ERROR(스택) |
 
 - `NullPointerException` 은 따로 매핑하지 않아 500 이다. 필수 칸은 요청 검증이 먼저 400 으로 막으므로, 안쪽까지 온 null 은 코드의 버그다.
-- 모르는 예외는 고정 code 와 고정 문구로만 응답한다. 원인과 스택은 로그에만 남긴다(ADR-012). 인증 필터의 401 도 같은 본문으로 낸다(ADR-018).
-- 로그는 이 처리기에서 한 번 남긴다(ADR-010). 업무 4xx 와 503 은 WARN, 처리하지 못한 500 은 ERROR 다.
+- 모르는 예외는 고정 code 와 고정 문구로만 응답한다. 원인과 스택은 로그에만 남긴다(ADR-013). 인증 필터의 401 도 같은 본문으로 낸다(ADR-019).
+- 로그는 이 처리기에서 한 번 남긴다(ADR-011). 업무 4xx 와 503 은 WARN, 처리하지 못한 500 은 ERROR 다.
 - 컨트롤러에서 `ResponseStatusException` 을 던지지 않는다. 사유 예외를 던지고 처리기가 바꾼다.
 - 형식 검증은 요청 record 의 Bean Validation 과 인자의 `@Valid` 로 한다. `@RequestParam`, `@PathVariable` 에도 제약을 단다. 업무 검증은 서비스가 사유 예외로 한다.
   - 요청 record 의 필수 칸(코드값 enum 칸 포함)에는 `@NotNull` 이나 `@NotBlank` 를 달고, 선택 칸에는 달지 않는다.
   - Spring 6.1 이상이면 컨트롤러 클래스에 `@Validated` 를 달지 않는다. 메서드 검증이 내장이고, 달면 AOP 검증이 먼저 돌아 처리기가 받는 예외 타입이 갈린다.
-- 컨트롤러 메서드는 요청을 바꾸고, 서비스를 한 번 부르고, 응답으로 바꾼다. 분기와 판단을 두지 않는다(ADR-001).
-- 컨트롤러는 응답 DTO 를 낸다. 도메인 값이나 영속 엔티티를 그대로 내지 않는다(ADR-004).
+- 컨트롤러 메서드는 요청을 바꾸고, 서비스를 한 번 부르고, 응답으로 바꾼다. 분기와 판단을 두지 않는다(ADR-002).
+- 컨트롤러는 응답 DTO 를 낸다. 도메인 값이나 영속 엔티티를 그대로 내지 않는다(ADR-005).
 - 목록은 페이지 번호와 크기를 받고 크기에 상한을 둔다. 새 경로는 kebab-case 복수 명사이고, 조건이 복잡한 조회는 `POST .../search` 다. 이미 공개한 경로와 본문은 계약이라 그대로 둔다.
 
 ### 체크리스트
@@ -90,4 +90,4 @@ Accepted
 
 ## References
 
-- ADR-001(값 객체 검증), ADR-004(바깥 계약과 도메인 분리), ADR-005(사유 예외, 공통 형제, ErrorCode), ADR-010(로그), ADR-012(입력 검증과 내부 정보), ADR-018(인증 경계)
+- ADR-002(값 객체 검증), ADR-005(바깥 계약과 도메인 분리), ADR-006(사유 예외, 공통 형제, ErrorCode), ADR-011(로그), ADR-013(입력 검증과 내부 정보), ADR-019(인증 경계)

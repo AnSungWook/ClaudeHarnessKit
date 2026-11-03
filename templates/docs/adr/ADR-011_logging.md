@@ -1,4 +1,4 @@
-# ADR-010: 로그는 수준을 뜻대로 쓰고, 한 번만, 안전하게 남긴다
+# ADR-011: 로그는 수준을 뜻대로 쓰고, 한 번만, 안전하게 남긴다
 
 ## Status
 
@@ -32,7 +32,7 @@ Accepted
   | DEBUG | 진단용 상세. 운영 기본값에서는 꺼져 있다 |
 
 - 메시지는 매개변수(`log.info("Order paid: orderId={}", id)`)로 쓴다. 문자열 연결로 만들지 않는다. 키=값 꼴로 써서 검색이 되게 한다.
-- 예외는 처리하는 경계에서 한 번만 스택과 함께 남긴다(ADR-005). 중간에서 "찍고 다시 던지기" 를 하지 않는다.
+- 예외는 처리하는 경계에서 한 번만 스택과 함께 남긴다(ADR-006). 중간에서 "찍고 다시 던지기" 를 하지 않는다.
 - 남기지 않는 것: 비밀번호, 토큰, API 키, 주민·카드번호 같은 개인정보, 요청·응답 본문 통째로. 필요하면 가린 값이나 식별자만.
 - `System.out`, `printStackTrace()` 를 쓰지 않는다.
 - 운영이 기대는 로그 문구(경보 규칙이 거는 문구)를 바꿀 때는 그 규칙을 함께 고친다.
@@ -75,4 +75,4 @@ Accepted
 ## References
 
 - 출처: [jabrena/plinth 181-java-observability-logging](https://github.com/jabrena/plinth/blob/main/skills/181-java-observability-logging/references/181-java-observability-logging.md), [github/awesome-copilot springboot.instructions.md](https://github.com/github/awesome-copilot/blob/main/instructions/springboot.instructions.md), [affaan-m/everything-claude-code java-reviewer.md](https://github.com/affaan-m/everything-claude-code/blob/main/agents/java-reviewer.md), [github/awesome-copilot code-review-generic.instructions.md](https://github.com/github/awesome-copilot/blob/main/instructions/code-review-generic.instructions.md)
-- ADR-005 도메인 사유 예외(경계에서만 잡는다)
+- ADR-006 도메인 사유 예외(경계에서만 잡는다)

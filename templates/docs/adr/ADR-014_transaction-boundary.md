@@ -1,4 +1,4 @@
-# ADR-013: 트랜잭션은 응용 서비스에 두고, 그 안에서 바깥을 부르지 않는다
+# ADR-014: 트랜잭션은 응용 서비스에 두고, 그 안에서 바깥을 부르지 않는다
 
 ## Status
 
@@ -22,7 +22,7 @@ Accepted
 
 **트랜잭션 경계는 응용 서비스의 업무 단위 하나다.**
 
-- `@Transactional` 은 응용 서비스(ADR-004 의 서비스 층) 메서드에 둔다. 컨트롤러와 어댑터(리포지토리 포함)에는 두지 않는다.
+- `@Transactional` 은 응용 서비스(ADR-005 의 서비스 층) 메서드에 둔다. 컨트롤러와 어댑터(리포지토리 포함)에는 두지 않는다.
 - 읽기만 하는 메서드는 읽기 전용 트랜잭션(`readOnly = true`)으로 둔다.
 - 트랜잭션 안에서 바깥(HTTP API, LLM, 메시지 발행, 파일·오브젝트 스토리지)을 부르지 않는다. 바깥 호출은 트랜잭션 밖에서 하고, 결과 저장만 짧은 트랜잭션으로 한다.
 - 커밋 뒤에 해야 하는 일(이벤트 발행, 알림)은 커밋 뒤 실행(트랜잭션 이벤트 리스너, 아웃박스)으로 한다.
@@ -64,4 +64,4 @@ Accepted
 ## References
 
 - 출처: [affaan-m/everything-claude-code java-reviewer.md](https://github.com/affaan-m/everything-claude-code/blob/main/agents/java-reviewer.md), [jabrena/plinth 312-frameworks-spring-data-jdbc](https://github.com/jabrena/plinth/blob/main/skills/312-frameworks-spring-data-jdbc/references/312-frameworks-spring-data-jdbc.md)
-- ADR-004 헥사고날 층
+- ADR-005 헥사고날 층

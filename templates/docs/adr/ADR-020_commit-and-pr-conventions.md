@@ -1,4 +1,4 @@
-# ADR-019: 커밋 제목은 `type(scope): subject` 이고, 본문과 PR 은 왜와 돌린 검증을 든다
+# ADR-020: 커밋 제목은 `type(scope): subject` 이고, 본문과 PR 은 왜와 돌린 검증을 든다
 
 ## Status
 
@@ -69,4 +69,4 @@ Accepted
 ## References
 
 - [Conventional Commits](https://www.conventionalcommits.org/)
-- ADR-006(바꾼 줄만 고친다 - 모양만 바꾼 커밋을 기능 커밋과 섞지 않는다)
+- ADR-007(바꾼 줄만 고친다 - 모양만 바꾼 커밋을 기능 커밋과 섞지 않는다)

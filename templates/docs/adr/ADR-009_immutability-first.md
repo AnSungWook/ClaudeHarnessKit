@@ -1,4 +1,4 @@
-# ADR-008: 불변을 먼저 쓴다
+# ADR-009: 불변을 먼저 쓴다
 
 ## Status
 
@@ -22,7 +22,7 @@ Accepted
 
 **값은 불변으로 만들고, 바뀌는 상태는 꼭 필요한 곳에만 둔다.**
 
-- 값 객체와 전달 객체는 record(또는 모든 필드 `final`)로. setter 를 두지 않는다. 바꾼 값이 필요하면 새 객체를 만든다(ADR-001 의 `withXxx`).
+- 값 객체와 전달 객체는 record(또는 모든 필드 `final`)로. setter 를 두지 않는다. 바꾼 값이 필요하면 새 객체를 만든다(ADR-002 의 `withXxx`).
 - 컬렉션은 불변으로 만들고 돌려준다(`List.of`, `List.copyOf`, `stream().toList()`). 받은 컬렉션을 고치지 않는다 - 필요하면 복사해서 고친다.
 - record 가 가변 컬렉션을 받으면 생성자에서 `List.copyOf` 로 방어 복사한다.
 - `Optional` 은 메서드 반환값에만 쓴다. 필드·매개변수·컬렉션 원소로 쓰지 않는다.
@@ -68,4 +68,4 @@ Accepted
 ## References
 
 - 출처: [giuseppe-trisciuoglio/developer-kit](https://github.com/giuseppe-trisciuoglio/developer-kit/tree/main/plugins/developer-kit-java), [piomin/claude-ai-spring-boot](https://github.com/piomin/claude-ai-spring-boot)
-- ADR-001 정적 팩토리와 책임(`withXxx`)
+- ADR-002 정적 팩토리와 책임(`withXxx`)

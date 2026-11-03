@@ -1,4 +1,4 @@
-# ADR-011: 테스트는 범위를 나누고, 테스트 더블은 바깥 의존에만 쓴다
+# ADR-012: 테스트는 범위를 나누고, 테스트 더블은 바깥 의존에만 쓴다
 
 ## Status
 
@@ -26,13 +26,13 @@ Accepted
 
   | 범위 | 무엇 | 컨텍스트 |
   |---|---|---|
-  | 단위 | 도메인 값과 판단, 서비스 흐름 | 띄우지 않는다. `new` 로 만든다(ADR-007) |
+  | 단위 | 도메인 값과 판단, 서비스 흐름 | 띄우지 않는다. `new` 로 만든다(ADR-008) |
   | 통합 | 어댑터와 바깥(DB, HTTP, 파일), 설정 조립 | 필요한 만큼만 띄운다. 진짜 DB 나 컨테이너 |
 
 - 테스트 더블은 바깥 의존(포트 뒤의 외부 API, 시계, 난수, 메시지 발행)에만 쓴다. 도메인 객체와 값은 진짜를 쓴다.
 - 목이 불렸는지만 단언하지 않는다. 결과 값이나 남은 상태를 단언한다. 호출 검증은 그것 자체가 계약일 때(예: 외부로 한 번만 보낸다)만.
 - 기대값은 리터럴로 쓴다. 대상 코드와 같은 계산으로 기대값을 만들지 않는다.
-- 시각은 고정한 `Clock` 을 넣는다(ADR-002). 비동기는 `Thread.sleep` 대신 조건을 기다리는 도구(Awaitility 등)로.
+- 시각은 고정한 `Clock` 을 넣는다(ADR-003). 비동기는 `Thread.sleep` 대신 조건을 기다리는 도구(Awaitility 등)로.
 - 테스트 하나는 한 가지 동작을 본다. 이름이 그 동작을 말한다.
 
 ### 체크리스트
@@ -73,4 +73,4 @@ Accepted
 ## References
 
 - 출처: [affaan-m/everything-claude-code java-coding-standards](https://github.com/affaan-m/everything-claude-code/blob/main/skills/java-coding-standards/SKILL.md), [affaan-m/everything-claude-code java-reviewer.md](https://github.com/affaan-m/everything-claude-code/blob/main/agents/java-reviewer.md), [obra/superpowers writing-good-tests.md](https://github.com/obra/superpowers/blob/main/skills/test-driven-development/writing-good-tests.md), [github/awesome-copilot code-review-generic.instructions.md](https://github.com/github/awesome-copilot/blob/main/instructions/code-review-generic.instructions.md)
-- ADR-002(Clock), ADR-004(포트), ADR-007(생성자 주입)
+- ADR-003(Clock), ADR-005(포트), ADR-008(생성자 주입)
