@@ -125,3 +125,4 @@ Accepted
 ## References
 
 - ADR-005 헥사고날 층과 의존 방향
+- 예시: [examples/006-domain-reason-exceptions](examples/006-domain-reason-exceptions/README.md) - 바른 모양(good)과 어긋난 모양(bad)

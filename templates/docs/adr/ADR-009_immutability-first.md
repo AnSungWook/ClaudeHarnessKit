@@ -69,3 +69,4 @@ Accepted
 
 - 출처: [giuseppe-trisciuoglio/developer-kit](https://github.com/giuseppe-trisciuoglio/developer-kit/tree/main/plugins/developer-kit-java), [piomin/claude-ai-spring-boot](https://github.com/piomin/claude-ai-spring-boot)
 - ADR-002 정적 팩토리와 책임(`withXxx`)
+- 예시: [examples/009-immutability-first](examples/009-immutability-first/README.md) - 바른 모양(good)과 어긋난 모양(bad)

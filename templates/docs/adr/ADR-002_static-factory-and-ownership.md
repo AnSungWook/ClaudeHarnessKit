@@ -82,3 +82,4 @@ return OrderResult.of(order, payment, clock);
 
 - ADR-005 헥사고날 층과 의존 방향
 - 기계 검사 예: 아키텍처 테스트로 생성 인자 안의 삼항·문자열 연결·계산을 잡는다
+- 예시: [examples/002-static-factory-and-ownership](examples/002-static-factory-and-ownership/README.md) - 바른 모양(good)과 어긋난 모양(bad)

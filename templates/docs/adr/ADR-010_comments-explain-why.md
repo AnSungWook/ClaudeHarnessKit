@@ -64,3 +64,4 @@ Accepted
 ## References
 
 - 출처: [PatrickJS/awesome-cursorrules](https://github.com/PatrickJS/awesome-cursorrules/tree/main/rules)(clean-code), [anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/code-simplifier)(code-simplifier)
+- 예시: [examples/010-comments-explain-why](examples/010-comments-explain-why/README.md) - 바른 모양(good)과 어긋난 모양(bad)

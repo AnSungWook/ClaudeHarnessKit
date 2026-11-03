@@ -78,3 +78,4 @@ Accepted
 
 - 출처: [jabrena/plinth 181-java-observability-logging](https://github.com/jabrena/plinth/blob/main/skills/181-java-observability-logging/references/181-java-observability-logging.md), [github/awesome-copilot springboot.instructions.md](https://github.com/github/awesome-copilot/blob/main/instructions/springboot.instructions.md), [affaan-m/everything-claude-code java-reviewer.md](https://github.com/affaan-m/everything-claude-code/blob/main/agents/java-reviewer.md), [github/awesome-copilot code-review-generic.instructions.md](https://github.com/github/awesome-copilot/blob/main/instructions/code-review-generic.instructions.md)
 - ADR-006 도메인 사유 예외(경계에서만 잡는다)
+- 예시: [examples/011-logging](examples/011-logging/README.md) - 바른 모양(good)과 어긋난 모양(bad)

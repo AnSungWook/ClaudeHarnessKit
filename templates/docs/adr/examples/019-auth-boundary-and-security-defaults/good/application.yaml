@@ -1,0 +1,16 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 20MB
+
+auth:
+  internal-token: ${INTERNAL_TOKEN}
+  allowed-origins:
+    - https://admin.example.com

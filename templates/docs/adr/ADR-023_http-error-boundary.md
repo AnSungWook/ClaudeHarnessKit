@@ -93,3 +93,4 @@ Accepted
 ## References
 
 - ADR-002(값 객체 검증), ADR-005(바깥 계약과 도메인 분리), ADR-006(사유 예외, 공통 형제, ErrorCode), ADR-011(로그), ADR-013(입력 검증과 내부 정보), ADR-019(인증 경계)
+- 예시: [examples/023-http-error-boundary](examples/023-http-error-boundary/README.md) - 바른 모양(good)과 어긋난 모양(bad)

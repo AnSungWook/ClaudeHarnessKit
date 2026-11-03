@@ -66,3 +66,4 @@ Accepted
 
 - 출처: [affaan-m/everything-claude-code java-reviewer.md](https://github.com/affaan-m/everything-claude-code/blob/main/agents/java-reviewer.md), [jabrena/plinth 312-frameworks-spring-data-jdbc](https://github.com/jabrena/plinth/blob/main/skills/312-frameworks-spring-data-jdbc/references/312-frameworks-spring-data-jdbc.md)
 - ADR-005 헥사고날 층
+- 예시: [examples/014-transaction-boundary](examples/014-transaction-boundary/README.md) - 바른 모양(good)과 어긋난 모양(bad)

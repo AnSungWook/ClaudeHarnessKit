@@ -73,3 +73,4 @@ Accepted
 ## References
 
 - ADR-003(비밀값은 기본값 없이), ADR-013(입력 검증과 내부 정보 노출 금지), ADR-018(바깥 HTTP), ADR-023(오류 본문 모양)
+- 예시: [examples/019-auth-boundary-and-security-defaults](examples/019-auth-boundary-and-security-defaults/README.md) - 바른 모양(good)과 어긋난 모양(bad)

@@ -67,3 +67,4 @@ Accepted
 
 - ADR-002 정적 팩토리와 책임
 - ADR-003 설정 키 깊이와 바인딩 record
+- 예시: [examples/004-no-nested-types](examples/004-no-nested-types/README.md) - 바른 모양(good)과 어긋난 모양(bad)

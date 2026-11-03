@@ -65,3 +65,4 @@ Accepted
 - 출처: [giuseppe-trisciuoglio/developer-kit](https://github.com/giuseppe-trisciuoglio/developer-kit/tree/main/plugins/developer-kit-java), [piomin/claude-ai-spring-boot](https://github.com/piomin/claude-ai-spring-boot), [PatrickJS/awesome-cursorrules](https://github.com/PatrickJS/awesome-cursorrules/tree/main/rules)(kotlin-springboot)
 - ADR-005 헥사고날 층과 의존 방향
 - ADR-009 불변 우선(`Optional` 은 반환값에만)
+- 예시: [examples/008-constructor-injection](examples/008-constructor-injection/README.md) - 바른 모양(good)과 어긋난 모양(bad)

@@ -74,4 +74,4 @@ Accepted
 - Robert C. Martin, *Clean Code* 2장 "의미 있는 이름", 3장 "함수"(내려가기 규칙)
 - John Ousterhout, *A Philosophy of Software Design* 의 "얕은 모듈", "좋은 이름 고르기"
 - ADR-002, ADR-005, ADR-014(커밋 뒤 리스너), ADR-015(실행기), ADR-016(이름), ADR-020(흐름 글), ADR-021(선언적 문법)
-- 예시: [API 로 배치 잡을 실행하는 흐름](examples/readable-flow-batch.md) - 읽기 어려운 모양과 따라 읽히는 모양, 공개 참고 코드(Spring Batch 공식 샘플, spring-petclinic)
+- 예시: [examples/001-readable-flow](examples/001-readable-flow/README.md) - 바른 모양(good)과 어긋난 모양(bad), 공개 참고 코드

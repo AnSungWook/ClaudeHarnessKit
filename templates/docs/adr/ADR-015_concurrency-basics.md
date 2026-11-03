@@ -73,3 +73,4 @@ Accepted
 
 - 출처: [jabrena/plinth 125-java-concurrency](https://github.com/jabrena/plinth/blob/main/skills/125-java-concurrency/SKILL.md), [affaan-m/everything-claude-code java-reviewer.md](https://github.com/affaan-m/everything-claude-code/blob/main/agents/java-reviewer.md)
 - ADR-006, ADR-009, ADR-010
+- 예시: [examples/015-concurrency-basics](examples/015-concurrency-basics/README.md) - 바른 모양(good)과 어긋난 모양(bad)

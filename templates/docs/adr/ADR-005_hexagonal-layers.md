@@ -78,3 +78,4 @@ Accepted
 - ADR-002 정적 팩토리와 책임
 - ADR-006 도메인 사유 예외(바깥 예외는 어댑터에서 감싼다)
 - 기계 검사 예: ArchUnit 등으로 층 사이 import 방향 검사
+- 예시: [examples/005-hexagonal-layers](examples/005-hexagonal-layers/README.md) - 바른 모양(good)과 어긋난 모양(bad)
