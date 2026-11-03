@@ -27,6 +27,47 @@ Accepted
 - 업무 사유에 범용 예외(`RuntimeException`, `IllegalStateException`, `IllegalArgumentException`)를 직접 던지지 않는다. 범용 예외는 "있을 수 없는 상태"(프로그래밍 오류)와 값 객체 생성자의 인자 검증에만.
 - 외부 라이브러리 예외(I/O, HTTP 클라이언트, 드라이버 예외)는 어댑터에서 사유 예외로 감싼다. 원인(`cause`)을 달고, 서비스까지 라이브러리 예외가 올라오지 않게 한다(ADR-004).
 - 예외는 그 도메인 패키지의 `exception/` 에 둔다. 재시도 여부 같은 처리 표시는 예외 타입이 든다(메시지 문구로 판단하지 않는다).
+- 위계는 공통 부모 `BusinessException` 하나 아래에 둔다. 도메인(모듈)마다 부모를 하나 두고(`OrderException`, `PaymentException`) 그 도메인의 사유 예외가 상속한다.
+  - 경계가 HTTP 상태로 바꾸는 공통 형제 다섯을 같은 공통 패키지에 둔다: 없음 `NotFoundException`(404), 충돌 `ConflictException`(409, 중복과 상태 충돌), 금지 `ForbiddenException`(403), 잘못된 값 `InvalidValueException`(400, 칸 이름과 사유를 든 `errors[]`), 응답 없음 `UnavailableException`(503, 바깥 시스템이나 저장소가 응하지 않음). 도메인 사유 가운데 이 갈래인 것만 그 형제를 상속한다(ADR-022).
+  - 업무 사유가 아니라 바깥 호출의 기술 실패만 다루는 모듈(외부 모델, 결제사 게이트웨이 같은)은 `BusinessException` 밖에 따로 위계를 둘 수 있다. 그때도 sealed 부모 하나와 그 모듈의 오류 코드 enum 을 든다.
+- **오류 코드는 도메인마다 enum `{Domain}ErrorCode implements CustomErrorCode` 로 둔다.** `CustomErrorCode` 는 `getCode()` 와 `getMessage()` 두 메서드다.
+  - enum 에 code 칸을 따로 두지 않는다. `getCode()` 가 `name()` 을 돌려줘 code 와 enum 이름이 어긋날 길이 없다. `getMessage()` 는 사용자에게 보이는 문구다.
+  - 사유 예외는 자기 ErrorCode 를 든다. 예외마다 `code()` 를 따로 정의하지 않는다. 경계 처리기가 그 code 와 message 로 오류 본문을 만든다(ADR-022).
+  - 예외 안 문구는 둘이고 섞지 않는다. 로그에 남는 내부 문구는 예외 클래스의 `MESSAGE` 상수에 key=value 를 덧붙여 만들고(ADR-010), 사용자 문구는 ErrorCode 의 message 다.
+  - 공개한 code 는 이름을 바꾸지 않는다. 바꿔야 하면 옛 상수를 `@Deprecated` 로 두고 새 code 를 더한다.
+
+  ```java
+  public interface CustomErrorCode {
+      String getCode();
+      String getMessage();
+  }
+
+  @Getter
+  @RequiredArgsConstructor
+  public enum OrderErrorCode implements CustomErrorCode {
+      ORDER_ALREADY_PAID("이미 결제된 주문입니다."),
+      ORDER_NOT_FOUND("주문을 찾을 수 없습니다.");
+
+      private final String message;
+
+      @Override
+      public String getCode() {
+          return name();
+      }
+  }
+
+  public class OrderAlreadyPaidException extends OrderException {
+      private static final String MESSAGE = "Order already paid: orderId=%d, status=%s";
+
+      public OrderAlreadyPaidException(long orderId, String status) {
+          super(OrderErrorCode.ORDER_ALREADY_PAID, MESSAGE.formatted(orderId, status));
+      }
+  }
+  ```
+- **DB 에 적는 실패 사유는 `코드: 메시지` 모양이다.** 예외 클래스 이름을 적지 않는다 - 클래스 이름은 리팩토링으로 바뀌지만 code 는 공개한 뒤 바꾸지 않는다. 사유 글자로 재시도 횟수나 처리 갈래를 가르지 않는다(가를 일이 있으면 상태 칸을 둔다).
+  - 메시지 자리는 예외의 내부 문구(값 포함)다. 사용자 문구가 아니다 - 사용자 문구는 고정이라 무엇이 왜 실패했는지 값이 빠진다.
+  - ErrorCode 를 들지 않은 그 밖의 예외(범용, 프레임워크 예외)는 문구 없이 `INTERNAL_ERROR: 예외 클래스 전체 이름` 만 적는다(예: `INTERNAL_ERROR: java.lang.NullPointerException`). 그런 문구에는 SQL 이나 개인정보가 섞일 수 있다. 문구와 스택은 로그로 간다.
+  - 이 칸을 바깥 응답으로 내보낼 때는 클래스 이름과 문구를 빼고 고정 문구로 바꾼다(ADR-012, ADR-022).
 - 잡는 자리는 경계뿐 - 컨트롤러 예외 처리기(HTTP 상태로), 배치 스텝, 작업 단위 하나(실패 결과로). 중간에서 잡아 삼키지 않는다.
 - 실패를 숨기지 않는다. 잡았으면 사유 예외로 바꿔 다시 던지거나, 경계에서 실패 결과(상태·사유)로 남긴다. 다음은 금지:
   - 빈 `catch`, `catch (Exception e)` 로 넓게 잡고 넘어가기.
@@ -38,6 +79,9 @@ Accepted
 
 - [ ] 업무 사유에 `throw new RuntimeException/IllegalStateException/IllegalArgumentException` 이 없다(새로 생긴 것)
 - [ ] 새 예외 이름만 보고 사유를 알 수 있다
+- [ ] 사유 예외가 자기 도메인 `{Domain}ErrorCode` 를 들고, enum 의 code 가 `name()` 이다(예외마다 `code()` 상수가 없다)
+- [ ] 공개한 code 이름을 바꾸지 않았다(바꿀 때는 `@Deprecated` 와 새 상수)
+- [ ] DB 실패 사유가 `코드: 메시지` 이고, ErrorCode 없는 예외는 `INTERNAL_ERROR: 클래스 이름` 만 남는다
 - [ ] 외부 라이브러리 예외가 어댑터 밖으로 나가지 않는다(`cause` 를 단 사유 예외로)
 - [ ] 예외를 잡아 로그만 찍고 삼키는 `catch` 가 없다
 - [ ] 메시지 문구로 분기하는 코드가 없다
@@ -51,13 +95,18 @@ Accepted
 | `throw new IllegalStateException("이미 결제됨")` | `throw new OrderAlreadyPaidException(orderId)` |
 | `catch (IOException e) { throw new RuntimeException(e); }` 를 서비스에서 | 어댑터에서 `throw new ReportStorageUnavailableException(key, e)` |
 | `if (e.getMessage().contains("timeout"))` 로 재시도 판단 | 예외 타입(또는 타입이 든 재시도 표시)으로 판단 |
-| 에러 코드 enum 하나 + 범용 예외 하나 | 사유마다 이름 있는 예외 클래스 |
+| 에러 코드 enum 하나 + 범용 예외 하나 | 사유마다 이름 있는 예외 클래스 + 그 예외가 드는 도메인 ErrorCode |
+| 저장소 전체 에러 코드 enum 하나 | 도메인마다 enum - 모든 모듈이 한 파일을 고치지 않게 |
+| 예외마다 `CODE`, `USER_MESSAGE` 상수 | 도메인 ErrorCode enum 한 자리, code 는 `name()` |
+| 실패 사유 칸에 `com.example.order.OrderAlreadyPaidException: ...` | `ORDER_ALREADY_PAID: Order already paid: orderId=1, status=PAID` |
+| 실패 사유 칸에 `NullPointerException` 의 문구 | `INTERNAL_ERROR: java.lang.NullPointerException`, 문구와 스택은 로그 |
 | 체크 예외 `throws OrderException` 를 계층마다 전파 | 언체크 사유 예외, 경계에서만 잡기 |
 | 중간 계층에서 `catch (Exception e) { log.warn(...) }` | 경계까지 올려 거기서 응답·실패 결과로 |
 
 ## 다른 언어에서
 
 - Kotlin: Java 와 같다(체크 예외가 없으니 사유 예외 클래스만).
+- 오류 코드 enum 은 언어의 enum 이나 문자열 리터럴 유니온으로 같은 모양(도메인마다 하나, 이름이 곧 code)을 둔다.
 - TypeScript: `Error` 를 상속한 사유 클래스(`class OrderAlreadyPaidError extends Error`). 예상되는 실패가 많은 흐름은 결과 타입(`Result`)을 써도 되지만, 그때도 실패 종류는 타입으로 구분한다.
 - Python: `Exception` 을 상속한 사유 예외. 맨 `except:`, `except Exception: pass` 금지는 같다.
 

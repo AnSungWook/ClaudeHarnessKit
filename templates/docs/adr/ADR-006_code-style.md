@@ -26,6 +26,25 @@ Accepted
 - Reformat 은 바꾼 줄에만(IntelliJ "Reformat → VCS changed text"). 파일 전체 Reformat 이나 모양만 바꾸는 diff 를 기능 변경과 섞지 않는다.
 - 예외: 패키지 루트 변경처럼 어차피 모든 파일이 바뀌는 작업에서는 전체 Reformat 을 한 번 한다. 이때 이름 변경 커밋과 Reformat 커밋을 나눠, 리뷰가 둘을 따로 보게 한다.
 - AI 에이전트에게도 같은 규칙을 준다 - 편집한 줄 밖의 모양을 바꾸지 않는다.
+- 빌드 파일의 의존 목록은 자리, 종류, 알파벳 순으로 적는다(Gradle `dependencies` 예).
+  - 자리는 위에서 아래로 `implementation` 라이브러리, `implementation project(...)`, `testImplementation` 라이브러리, `testImplementation testFixtures(project(...))`, `testImplementation project(...)`.
+  - 그 밖의 설정은 Spring Initializr 가 만드는 순서로 그 사이에 둔다: `compileOnly`, `developmentOnly`, `runtimeOnly`, `annotationProcessor` 는 `implementation` 묶음 아래, `testCompileOnly`, `testRuntimeOnly`, `testAnnotationProcessor` 는 `testImplementation` 묶음 아래. `api` 는 `implementation` 바로 위.
+  - 같은 자리 안은 알파벳 오름차순이다. 라이브러리는 `group:artifact` 좌표로, 모듈은 경로 문자열로 견준다.
+  - 운영 묶음과 테스트 묶음 사이는 빈 줄 하나, 묶음 안에는 빈 줄을 두지 않는다. 줄 위 주석은 그 줄과 같이 움직인다.
+  - 순서를 맞추는 커밋은 줄 순서만 바꾸고 의존을 더하거나 빼지 않는다. 처음부터 정렬 플러그인을 걸어 모든 파일을 흔드는 diff 를 내지 않는다.
+
+  ```groovy
+  dependencies {
+      implementation 'org.jsoup:jsoup:1.22.2'
+      implementation project(':common:core')
+      implementation project(':order:domain')
+      compileOnly 'org.postgresql:postgresql'
+
+      testImplementation 'org.testcontainers:testcontainers-postgresql'
+      testImplementation testFixtures(project(':common:testing'))
+      testImplementation project(':payment:domain')
+  }
+  ```
 
 ### 체크리스트
 
@@ -33,6 +52,7 @@ Accepted
 - [ ] diff 에 기능과 무관한 모양만 바뀐 줄이 없다
 - [ ] 저장소에 코드 스타일 파일이 커밋되어 있다
 - [ ] 전체 Reformat 이 필요하면 별도 커밋으로 나뉘어 있다
+- [ ] 빌드 파일 의존 목록이 자리(라이브러리 → 모듈, 운영 → 테스트)와 알파벳 순이고, 운영과 테스트 사이 빈 줄이 하나다
 
 ### 안티패턴
 
@@ -43,6 +63,7 @@ Accepted
 | IDE 기본 스타일에 맡김 | 저장소에 커밋한 스타일 파일을 따른다 |
 | 이름 변경과 Reformat 을 한 커밋에 | 이름 변경 커밋, Reformat 커밋을 나눈다 |
 | AI 가 파일을 다시 쓰며 들여쓰기·줄바꿈을 바꿈 | 편집한 줄만 바꾸도록 지시 |
+| 의존 목록 전체를 알파벳으로(모듈과 라이브러리가 엇갈림) | 라이브러리 묶음 다음 모듈 묶음 - 이 모듈이 어느 모듈을 무는지 몇 줄로 보인다 |
 
 ## 다른 언어에서
 
@@ -50,6 +71,7 @@ Accepted
 - TypeScript: `.editorconfig` + Prettier·ESLint 설정을 커밋. `import * as x` 를 남발하지 않는다.
 - Python: `pyproject.toml` 의 ruff/black 설정을 커밋. `from x import *` 금지.
 - 저장소 전체 포맷은 따로 한 번, 별도 커밋으로.
+- 의존 목록: npm, pnpm 은 `package.json` 을 도구가 알파벳으로 쓰니 그대로 둔다. Python `pyproject.toml` 은 운영 목록과 개발 그룹을 나누고 각 안을 알파벳 순으로. Maven 은 같은 자리 원칙으로 `<dependencies>` 안을 라이브러리, 모듈, `test` 범위 순으로.
 
 ## Consequences
 

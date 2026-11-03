@@ -45,13 +45,19 @@ Accepted
 
 - **폴더 이름은 위 목록만 쓴다.** `api`, `common`, `util`, `helper`, `manager`, `etc`, `impl`, `core` 를 기능 안 폴더 이름으로 쓰지 않는다(ADR-015). 특히 `api` 는 HTTP API 로 읽히므로, 모듈이 공개하는 입구는 `application/port/in`, 공개하는 값은 `domain` 에 둔다.
 - **한 폴더에는 한 성격만.** 컨트롤러는 `adapter/in/web` 에만, 설정은 `config` 에만, 영속 엔티티는 `adapter/out/persistence` 에만 둔다. 섞이면 위반이다.
-- **기능 사이 호출은 상대 기능의 `application/port/in` 과 `domain` 의 공개 값으로만.** 상대의 `adapter`, 영속 엔티티, `service` 구현을 import 하지 않는다.
+- **기능 사이 호출은 상대 기능의 `application/port/in` 과 `domain` 의 공개 값으로만.** 상대의 `adapter`, 영속 엔티티, `service` 구현을 import 하지 않는다. 영속 엔티티 연관만 아래 예외가 있다.
+- **다른 기능의 영속 엔티티를 가리킬 때는 키 칸이 기본이다.** 엔티티는 상대를 키 칸(`Long categoryId` 처럼)으로 든다.
+  - 상대 값이 필요하면 상대 `port/in` 에 키 목록을 받는 메서드를 두고 키를 모아 한 번 부른다 - 행마다 부르지 않는다.
+  - 상대 칸으로 거르거나 정렬하는 조회는 연관 없이 내 `adapter/out/persistence` 가 키 칸으로 조인한다(`join ... on o.categoryId = c.id`).
+  - 연관(`@ManyToOne(fetch = LAZY)`)은 내 엔티티의 메서드가 상대 값으로 판단해야 할 때만 둔다. 키 칸은 그대로 두고 연관은 같은 컬럼을 읽기만 한다(`insertable = false, updatable = false`). 연관 칸에는 getter 를 두지 않는다 - 연관은 그 엔티티의 메서드 안에서만 쓴다.
+  - 키 조인과 연관 모두 두 표가 같은 DB 에 있고, 방향이 `port/in` 을 부르는 방향과 같아야 한다.
+  - 그래서 다른 기능의 영속 엔티티 import 는 내 `adapter/out/persistence` 안에서만 된다. `domain`, `application` 은 안 된다.
 - **의존 방향은 ADR-004 그대로**: `adapter` → `application` → `domain`. `domain` 은 다른 폴더를 import 하지 않는다.
 - **작은 기능은 폴더를 줄여도 된다.** 바깥 입구가 하나뿐이면 `port/in` 없이 `application/service` 를 바로 부를 수 있고, 외부 호출이 없으면 `adapter/out/client` 를 만들지 않는다. 다만 있는 폴더의 이름과 자리는 바꾸지 않는다.
 - **리팩토링의 범위에는 패키지 정렬이 기본으로 들어간다.** 구조·설계 리팩토링을 하면 그 범위의 파일이 이 배치와 다른지 보고 같이 옮긴다. 따로 지시하지 않아도 한다. 옮기는 커밋은 기능 변경 커밋과 나눈다(ADR-006).
 - **위 배치는 새 저장소의 기본값이다. 이미 구조가 있는 저장소에서 모양이 섞여 있으면, 그 저장소의 현재 구조에 더 어울리는 한 가지 모양을 골라 저장소 전체를 그 모양으로 일관되게 맞춘다.**
   - 고르는 기준: 그 저장소에서 이미 가장 많이 쓰는 모양, 옮길 파일이 가장 적은 모양, 의존 방향(ADR-004)이 폴더에 가장 잘 드러나는 모양 순서로 본다. 예를 들어 저장소 전체가 성격별 최상위(`controller/`, `service/`, `repository/`)로 굳어 있으면 그 모양으로 맞추고, 기능별 최상위가 대부분이면 기능 안 성격 폴더를 위 이름으로 맞춘다.
-  - 고른 모양과 그 이유는 그 저장소의 ADR(ADR-017 이후)에 적는다. 그 뒤로는 새 코드도 그 모양을 따른다 - 저장소 안에 두 모양이 공존하지 않게 한다.
+  - 고른 모양과 그 이유는 그 저장소의 ADR(기본 ADR 다음 번호부터, `README.md`)에 적는다. 그 뒤로는 새 코드도 그 모양을 따른다 - 저장소 안에 두 모양이 공존하지 않게 한다.
   - 어느 모양을 고르든 지키는 것: 한 폴더에 한 성격, 목록 밖 폴더 이름(`api`, `common`, `util` 등) 금지, 의존 방향(ADR-004).
   - 옮기는 것은 기능(또는 폴더) 하나씩, 이동 커밋을 따로 낸다. 다 옮기기 전까지만 대응표를 문서에 둔다.
 
@@ -60,7 +66,8 @@ Accepted
 - [ ] 새 파일이 위 배치의 자리에 있다
 - [ ] 기능 안에 목록 밖 폴더 이름(`api`, `common`, `util` 등)이 없다
 - [ ] 한 폴더에 컨트롤러·설정·엔티티·서비스가 섞여 있지 않다
-- [ ] 다른 기능의 `adapter`, 영속 엔티티, `service` 구현을 import 하지 않는다
+- [ ] 다른 기능의 `adapter`, 영속 엔티티, `service` 구현을 import 하지 않는다(연관 예외는 내 `adapter/out/persistence` 안에서만)
+- [ ] 다른 기능 엔티티는 키 칸으로 들고, 연관이 있으면 엔티티 메서드가 판단에 쓰는 것이며 getter 가 없다
 - [ ] 구조 리팩토링 PR 에 패키지 정렬이 들어 있다(또는 안 한 이유가 적혀 있다)
 - [ ] 기존 저장소라면 고른 한 가지 모양이 그 저장소 ADR 에 적혀 있고, 저장소 안에 두 모양이 공존하지 않는다
 - [ ] 파일 이동 커밋과 기능 변경 커밋이 나뉘어 있다
@@ -73,6 +80,7 @@ Accepted
 | `order/` 한 폴더에 `OrderController`, `OrderConfig`, `OrderEntity`, `OrderService` | 성격별 폴더로 나눈다 |
 | 저장소 전체를 `controller/`, `service/`, `repository/` 로만 가르기(기능이 흩어짐) | 기능이 최상위, 성격은 그 안 |
 | `payment` 가 `order/adapter/out/persistence/OrderEntity` 를 import | `order/application/port/in` 의 유스케이스를 부른다 |
+| 다른 기능 엔티티에 `@ManyToOne` 을 걸고 서비스에서 `order.getCategory().getName()` | 키 칸 + `port/in` 에 키 목록 조회, 또는 내 영속 어댑터의 키 조인 |
 | 리팩토링 PR 에서 클래스만 고치고 폴더는 그대로 | 범위의 파일을 이 배치로 같이 옮긴다 |
 | `common/`, `util/` 에 아무 기능의 코드나 모음 | 주인 기능으로 옮기고, 진짜 공용만 `shared/` |
 

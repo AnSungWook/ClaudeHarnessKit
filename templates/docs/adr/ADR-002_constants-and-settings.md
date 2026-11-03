@@ -26,6 +26,11 @@ Accepted
 - 코드값은 enum. 사용 여부 `"Y"`/`"N"` 같은 문자열은 그 enum(예: `UseYn`) 밖에서 쓰지 않는다. 외부 JSON 칸은 문자열 그대로 두고 비교만 enum 으로.
 - 운영값은 `@ConfigurationProperties` record(생성자 바인딩, 또는 언어별 타입 있는 불변 설정 객체)에, 기본값은 한 곳에. `@Value` 를 쓰지 않는다. 설정 바인딩 클래스에도 setter 를 두지 않는다(ADR-008).
 - 범위 밖 설정값은 기동 때 막는다(검증 실패로 앱이 안 뜨게). 기동 때 설정 요약을 로그 한 덩이로 남긴다.
+- 우리 설정 키는 깊이로 나눈다. 형제 키가 같은 낱말을 하이픈으로 붙여 되풀이하면 그 낱말을 부모 키로 한 단계 올리고, 갈리는 부분만 자식 키로 둔다.
+  - 겹치는 낱말이 뒤에 오든(`email-template`, `sms-template` → `template.email`, `template.sms`) 앞에 오든(`retry-count`, `retry-delay` → `retry.count`, `retry.delay`) 같다.
+  - 부모 키는 자식들이 무엇인지 말하는 이름이다. 형제끼리 겹치지 않는 여러 낱말 키는 하이픈 그대로 둔다(`max-size`).
+  - 프레임워크 키(`spring.*`, `server.*`, `management.*`, `logging.*`)는 그 이름 그대로 쓴다.
+  - 바인딩하는 설정 record 도 같은 깊이로 중첩 record 를 둔다(`template.email` 이면 `TemplateProperties` 안의 `email` 칸). 키를 납작하게 늘어놓으면 묶음이 이름 속에 숨어 그 묶음을 단위로 넘기거나 검증할 수 없다.
 - 설정 파일은 이렇게 놓는다.
   - 기본 파일(`application.yaml`, 모듈 조각 `application-<모듈>.yaml`)이 운영 값 겸 공통 값을 든다. 환경마다 다른 값만 환경 파일(`application-{env}.yaml`)이 덮는다. 운영 전용 파일은 따로 두지 않는다 - 기본 파일이 운영 값이다.
   - 한 파일 안을 `---` 와 `spring.config.activate.on-profile` 로 나누지 않는다. 환경마다 파일 하나다.
@@ -48,6 +53,7 @@ Accepted
 - [ ] 설정 기본값이 한 곳에만 있다
 - [ ] `LocalDateTime.now()`, `Instant.now()` 등 직접 호출이 없다(테스트 제외)
 - [ ] 범위 밖 설정이 기동 때 실패한다
+- [ ] 형제 키가 같은 앞 낱말이나 뒤 낱말을 하이픈으로 되풀이하지 않는다(부모 키로 올렸다)
 - [ ] 설정 바인딩 클래스가 record(생성자 바인딩)이고 setter 가 없다
 - [ ] yaml 에 `${X:기본}` 모양이 없고, 비밀값 `${X}` 는 빈 값과 `${` 글자를 기동 때 막는다
 - [ ] 한 파일 안에 `---` + `on-profile` 이 없고, 운영 전용 `-prd` 파일이 없다
@@ -68,6 +74,7 @@ Accepted
 | `password: ${DB_PASSWORD:}`(빈 기본값) | `password: ${DB_PASSWORD}` + 빈 값과 `${` 글자를 막는 기동 검사 |
 | `if (env.acceptsProfiles("local")) skipAuth()` | 환경 파일의 `auth.enabled: false` 같은 키 |
 | 설정 클래스에 `@Setter` | record 생성자 바인딩 |
+| `retry-count`, `retry-delay`, `retry-backoff` 를 한 단계에 늘어놓기 | `retry.count`, `retry.delay`, `retry.backoff` 와 중첩 record `Retry` |
 
 ## 다른 언어에서
 
