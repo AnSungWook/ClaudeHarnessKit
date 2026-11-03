@@ -22,58 +22,82 @@ Accepted
 
 ## Decision
 
-**입력을 받은 자리에서 시작해 메서드와 클래스 이름만 읽어 내려가도 "이 흐름에서는 이 일을 하는구나" 를 알 수 있게 짠다. 이름을 읽고 "이게 뭔 소리지?" 가 나오면 그 자리를 고친다.**
+**입력을 받은 자리에서 시작해 이름만 읽어 내려가도 "이 흐름에서는 이 일을 하는구나" 를 알 수 있게 짠다. 이름을 읽고 "이게 뭔 소리지?" 가 나오면 그 자리를 고친다.**
 
 - 판단 기준은 처음 보는 사람이 입력부터 이름을 따라 흐름을 설명할 수 있는가이다. 파일 수, 깊이, 위임 여부 같은 형식으로 정하지 않는다.
-- 이름은 그 단계가 흐름에서 맡은 일을 말한다. 구현 수단(`run`, `handle`, `process`, `execute`, `holding`, `claim`, `stream`, `relay`)만 말하는 이름으로 흐름의 단계를 나타내지 않는다.
-  - 예: `claim()` 대신 `markRunningOrReject()`, `stream(run, response)` 대신 `runJobAndWriteProgress(...)`, `Slot` 대신 `JobRunningFlag`.
+- "이름" 은 메서드 이름 하나가 아니라 **호출식 전체**로 본다 - 받는 객체(또는 타입), 메서드, 인자의 이름을 프로젝트 업무 용어와 함께 읽는다. 그래서 `OrderResponse.of(order)`(ADR-002), `orders.findById(orderId)`, `memberService.getMember(memberId)`(ADR-016)는 그대로 괜찮다. 이 ADR 은 `of`, `get`, `find` 같은 규칙 이름을 금지하지 않는다.
+- 흐름의 단계를 나타내는 호출식은 그 단계가 흐름에서 맡은 일을 말한다. 구현 수단만 말하는 이름(`run`, `handle`, `process`, `execute`, `holding`, `claim`, `stream`, `relay`)으로 흐름의 단계를 나타내지 않는다.
+  - 예외: 프레임워크 계약이 정한 메서드(`Runnable.run`, `Tasklet.execute`, `JobLauncher.run`, 예외 처리기의 `handle…`)는 그 이름을 쓴다(ADR-016 의 프레임워크 계약 예외와 같다). 그 메서드를 부르는 우리 쪽 호출식이 맡은 일을 말하면 된다.
+  - 예: `claim()` 대신 `job.rejectIfAlreadyRunningAndMarkStarted()`, `stream(run, response)` 대신 `reportJobService.runAndWriteProgress(targetKey, response)`.
 - 위임하는 클래스나 메서드는 둬도 된다. 다만 그 이름이 위임해서 하는 일을 말해야 한다.
-- 이벤트, 콜백, 함수형 파이프라인, 리액티브 체인도 쓸 수 있다. 다만 두 가지를 지킨다.
-  - **묶고 이름 붙인다.** 람다나 연산자 조각을 흩어 두지 말고 한 덩어리로 묶어, 그 덩어리가 하는 일을 이름으로 말하게 한다(예: `OrderPlacedEvent` 와 `sendReceiptOnOrderPlaced`, 파이프라인은 `filterUnpaid` → `groupByMember` → `toReminderMail`).
-  - **프로세스 흐름에서 쓰이는 자리에만 둔다.** 그 일이 실제로 일어나는 단계에서 만들고 그 단계에서 돌린다. 한 자리에서 만들어 돌려주고 위로 돌아가 다른 자리에서 실행하는 식으로, 읽는 사람이 거슬러 올라가게 하지 않는다.
+- 이벤트, 콜백, 실행기에 넘기는 작업, 함수형 파이프라인, 리액티브 체인도 쓸 수 있다. 판단 기준은 **등록하거나 발행하는 자리에서 무슨 일이 언제 도는지 알 수 있는가**이다. 만든 곳과 실행되는 곳이 다른 것 자체는 문제가 아니다.
+  - 이벤트는 그 사실이 일어난 단계에서 발행하고, 이벤트 타입 이름이 무엇이 일어났는지 말한다(`OrderPlacedEvent`). 받는 쪽은 하는 일을 말하고(`sendReceiptOnOrderPlaced`), 이벤트 타입 이름으로 바로 찾을 수 있어야 한다. 커밋 뒤 리스너, 아웃박스(ADR-014), 실행기에 넘기는 작업(ADR-015)도 같은 기준이다.
+  - 언제 도는지(바로, 커밋 뒤, 다른 스레드)는 호출식, 리스너 선언, 등록 설정에서 확인할 수 있으면 된다(예: `@TransactionalEventListener(phase = AFTER_COMMIT)`, `@Async("mailExecutor")`, `executor.submit(sendReceiptTask)`). 그 밖의 자리를 뒤져야 알 수 있으면 고친다.
+  - 콜백과 넘기는 작업은 이름 있는 메서드나 타입으로 묶어 무엇을 하는지 말하게 한다.
+  - 파이프라인은 전체에 업무 목적이 드러나는 이름을 준다(`buildUnpaidReminderMails(orders)`). 개별 연산은 읽어야 업무 뜻을 알 수 있을 때만 이름을 붙여 뽑는다(`groupByMember`). 뜻이 바로 보이는 단순한 필터와 매핑은 그대로 둔다(ADR-021).
+  - 금지하는 것은 **이름으로 내용을 알 수 없는 실행 객체(람다를 든 홀더, "잡아 둔 실행")를 돌려줘, 호출한 쪽이 그 안을 뒤져야 무엇이 실행되는지 아는 구조**다.
 - 프레임워크의 익숙한 구조(Controller → Service, Job → Step, Listener → Handler)가 보이게 둔다. 그 구조를 아는 사람이 코드에서 그대로 찾을 수 있어야 한다.
 - 이름으로 다 말할 수 없는 이유(왜 이 순서인지, 왜 여기서 막는지)는 주석 한 줄로 적는다(ADR-010).
+- 입구(컨트롤러, 잡, 리스너, 메시지 수신)를 새로 만들거나 그 아래 업무 단계의 순서나 구성을 바꾼 PR 은 설명에 **흐름 글**을 적는다(ADR-020). 이름만 바꾼 PR, 단계 안쪽만 고친 PR 은 적지 않는다.
+  - 범위: 바뀐 흐름의 입구에서 업무 결과(저장, 응답, 발행)까지. 업무 단계의 호출식을 한 줄에 하나씩, 들여쓰기로 안쪽 단계를 적는다.
+  - 분기는 조건을 적고, 비동기 후속 처리(이벤트, 넘기는 작업)는 무엇이 언제 도는지와 받는 쪽의 업무 단계까지 적는다.
+  - 접근자, 단순 변환, 라이브러리 내부 호출은 적지 않는다.
+  - 리뷰어는 그 글과 코드의 이름이 맞는지, 글만 읽고 흐름을 알 수 있는지로 판정한다.
+
+  ```text
+  POST /orders → orderController.placeOrder(request)
+    orderService.placeOrder(command)
+      stock.reserve(items)            재고 부족이면 OutOfStockException(409)
+      orders.save(order)
+      OrderPlacedEvent 발행
+  커밋 뒤 → receiptListener.sendReceiptOnOrderPlaced(event)   mailExecutor 에서
+  ```
 
 ### 체크리스트
 
-- [ ] 입력을 받는 자리부터 이름만 따라 읽어도 흐름을 한 문장씩 설명할 수 있다
-- [ ] 흐름의 단계를 나타내는 메서드·클래스 이름이 구현 수단이 아니라 맡은 일을 말한다
+- [ ] 입구를 만들거나 업무 단계를 바꾼 PR 설명에 흐름 글(입구에서 업무 결과까지, 분기 조건, 비동기 후속 처리의 시점과 받는 쪽)이 있고, 코드의 이름과 맞는다
+- [ ] 그 글만 읽어도 각 단계가 무슨 일을 하는지 안다
+- [ ] 흐름의 단계를 나타내는 호출식(받는 객체, 메서드, 인자)이 구현 수단이 아니라 맡은 일을 말한다(프레임워크 계약 메서드는 예외)
 - [ ] 위임하는 자리의 이름이 위임해서 하는 일을 말한다
-- [ ] 이벤트, 콜백, 파이프라인은 묶여 있고 이름이 하는 일을 말한다
-- [ ] 이벤트, 콜백, 파이프라인이 프로세스 흐름에서 그 일이 일어나는 자리에만 있다(만든 자리와 실행되는 자리가 갈려 거슬러 읽게 하지 않는다)
+- [ ] 이벤트, 콜백, 넘기는 작업은 등록·발행하는 자리에서 무슨 일을 하는지 알 수 있고, 이벤트는 타입 이름으로 받는 쪽을 찾을 수 있다
+- [ ] 언제 도는지(바로, 커밋 뒤, 다른 스레드)를 호출식, 리스너 선언, 등록 설정에서 확인할 수 있다
+- [ ] 이름으로 내용을 알 수 없는 실행 객체를 돌려줘 호출한 쪽이 안을 뒤지게 하는 구조가 없다
+- [ ] 파이프라인 전체에 업무 목적 이름이 있다
 - [ ] 프레임워크의 익숙한 구조가 코드에서 보인다
 
 ### 안티패턴
 
 | 안티패턴 | 올바른 패턴 |
 |---------|-----------|
-| `stream(runs.report(key), response)` - 읽어도 무엇이 실행되는지 모른다 | `reportJobRunner.runAndWriteProgress(key, response)` 처럼 하는 일이 이름에 있다 |
-| `claim()`, `holding()`, `Slot` - 구현 수단만 말한다 | `markRunningOrReject()`, `JobRunningFlag` 처럼 흐름에서 맡은 일을 말한다 |
-| 할 일을 람다로 싸서 돌려주고, 위로 돌아가 다른 자리에서 실행 | 그 일이 일어나는 단계에서 만들고 그 자리에서 돌린다 |
-| 이름 없는 람다와 연산자가 길게 이어진 파이프라인 | 단계마다 이름 있는 메서드로 묶는다(`filterUnpaid`, `groupByMember`) |
+| `stream(runs.report(key), response)` - 읽어도 무엇이 실행되는지 모른다 | `reportJobService.runAndWriteProgress(targetKey, response)` 처럼 하는 일이 호출식에 있다 |
+| `slot.claim()`, `BatchRun.holding(...)` - 구현 수단만 말한다 | `job.rejectIfAlreadyRunningAndMarkStarted()` 처럼 대상, 조건, 동작을 말한다 |
+| 무엇을 실행하는지 이름으로 알 수 없는 실행 객체(람다를 든 홀더)를 돌려주고, 위로 돌아가 다른 자리에서 실행 | 그 단계에서 이름 있는 메서드를 부른다. 미뤄야 하면 무엇을 하는지 이름으로 말하는 작업(`sendReceiptTask`)이나 이벤트로 넘긴다 - 이름이 분명한 작업을 돌려주거나 실행기에 넘기는 것은 괜찮다 |
+| 이름 없는 람다와 연산자가 길게 이어져 업무 목적이 안 보이는 파이프라인 | 전체에 목적 이름(`buildUnpaidReminderMails(orders)`), 뜻이 안 보이는 연산만 뽑아 이름(`groupByMember`) |
 | 이벤트 이름이 `DataChanged`, 리스너가 `onEvent` | `OrderPlacedEvent`, `sendReceiptOnOrderPlaced` 처럼 무엇이 일어났고 무엇을 하는지 말한다 |
 | `process()`, `handle()`, `execute()` 가 층마다 이어진다 | 층마다 그 층이 하는 일을 이름으로(`validateTarget`, `startReportJob`, `writeResultLine`) |
 
 ## 다른 언어에서
 
-- 원칙(이름이 맡은 일을 말한다, 위에서 아래로 읽힌다, 익숙한 구조를 드러낸다)은 같다.
-- Kotlin: 고차 함수와 스코프 함수를 겹쳐 흐름을 가리지 않는다. 람다를 넘길 때 받는 매개변수 이름이 무엇을 미루는지 말하게 한다.
-- TypeScript(Node): 미들웨어와 데코레이터 이름이 그 단계가 하는 일을 말하게 한다. 라우터에서 처리 함수까지 이름으로 따라갈 수 있게.
-- Python: 데코레이터와 콜백 이름으로 흐름의 단계를 알 수 있게 한다.
+- 원칙(호출식이 맡은 일을 말한다, 등록·발행하는 자리에서 무엇이 언제 도는지 보인다, 익숙한 구조를 드러낸다)은 같다.
+- Kotlin: 고차 함수와 스코프 함수(`let`, `also`, `run` - 표준 라이브러리 함수라 결정 절의 구현 수단 이름 금지와는 상관없다)를 겹쳐 흐름을 가리지 않는다. 넘기는 람다가 길면 이름 있는 함수로 뽑는다. 코루틴의 `launch`, `async` 는 무엇을 띄우는지 이름 있는 함수로 넘긴다.
+- TypeScript(Node): 미들웨어와 데코레이터 이름이 그 단계가 하는 일을 말하게 한다. 이벤트 이미터는 이벤트 이름이 일어난 사실을 말하고, 핸들러 이름이 하는 일을 말한다.
+- Python: 데코레이터와 콜백 이름으로 흐름의 단계를 알 수 있게 한다. asyncio 의 `create_task` 에는 이름 있는 코루틴을 넘긴다.
 
 ## Consequences
 
 ### 긍정적
 - 처음 보는 사람도, 리뷰하는 사람도 입력부터 흐름을 따라간다.
 - AI 가 짠 코드도 사람이 확인할 수 있다. 확인할 수 있어야 나머지 ADR 을 지켰는지도 본다.
+- PR 의 흐름 글이 리뷰 판정의 근거로 남는다.
 - 고치거나 장애를 볼 때 볼 곳을 빨리 찾는다.
 
 ### 부정적
 - 이름이 길어질 수 있다.
 - 이름 짓는 데 시간이 든다. 좋은 이름이 안 나오면 구조가 이상하다는 신호로 보고 구조를 다시 본다.
+- PR 마다 흐름 글을 쓰는 수고가 든다.
 
 ## References
 
 - Robert C. Martin, *Clean Code* 2장 "의미 있는 이름", 3장 "함수"(내려가기 규칙 - 위에서 아래로 이야기처럼 읽힌다)
 - John Ousterhout, *A Philosophy of Software Design* 의 "얕은 모듈(shallow module)", "좋은 이름 고르기"
-- ADR-002, ADR-005, ADR-010, ADR-016(이름 규칙)
+- ADR-002, ADR-005, ADR-010, ADR-014, ADR-015, ADR-016(이름 규칙), ADR-020(PR), ADR-021(선언적 문법)
