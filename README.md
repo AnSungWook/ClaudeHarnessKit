@@ -28,7 +28,7 @@ bash /path/to/ClaudeHarnessKit/setup.sh
 ## ADR 을 고칠 때
 
 - 공통 ADR 은 이 저장소의 `templates/docs/adr/` 에서 고치고 PR 로 넣는다. 원칙은 언어 무관, 예시는 Java/Spring 이다.
-- 목록과 "프로젝트 결정은 ADR-024 부터" 문장은 `templates/docs/adr/README.md` 가 든다. ADR 을 더하면 둘 다 고친다.
+- 목록과 "프로젝트 결정은 ADR-024 부터" 문장은 `templates/docs/adr/README.md` 가 든다. 공통 ADR 을 더하면 둘 다 고친다. `CLAUDE.md` 템플릿은 번호를 박지 않고 이 문장을 가리킨다.
 - 이미 깐 프로젝트의 `docs/adr/` 는 저절로 따라오지 않는다. 2026-11-03 에 번호를 한 칸씩 밀었으니 그 전에 깐 프로젝트와는 번호 대신 제목으로 부른다.
 
 ## 걷은 것 (2026-11-03)
