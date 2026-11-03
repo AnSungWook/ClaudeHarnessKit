@@ -27,7 +27,7 @@ Accepted
 - `@Async`, `CompletableFuture.supplyAsync` 는 크기와 큐 상한이 정해진 실행기를 넘겨 쓴다. 기본 실행기·공용 풀에 맡기지 않는다.
 - `InterruptedException` 을 잡으면 중단 표시를 되살리고(`Thread.currentThread().interrupt()`) 작업을 끝내거나 사유 예외로 바꿔 던진다. 삼키지 않는다(ADR-006).
 - 바깥 호출에는 시간 제한을 둔다. 제한 없는 대기는 스레드를 묶는다(HTTP 는 ADR-018).
-- 잠금(`synchronized`, `ReentrantLock`)은 JVM 하나 안의 상태에만 쓴다(메모리 캐시, 집계, 서버마다 따로 쓰는 파일). 여러 서버가 같이 쓰는 데이터(DB 행, 공유 저장소 파일, 채번)는 DB 잠금(행 잠금, `SKIP LOCKED`)이나 저장소의 원자적 생성으로 다룬다. 지금 서버가 한 대여도 JVM 잠금으로 공유 데이터를 지키면 서버를 늘리는 날 조용히 깨진다 - 한 대라서 JVM 잠금을 썼으면 그 이유를 주석에 남긴다.
+- 잠금(`synchronized`, `ReentrantLock`)은 JVM 하나 안의 상태에만 쓴다(메모리 캐시, 집계, 서버마다 따로 쓰는 파일). 여러 서버가 같이 쓰는 데이터(DB 행, 공유 저장소 파일, 채번)는 DB 잠금(행 잠금, `SKIP LOCKED`)이나 저장소의 원자적 생성으로 다룬다. 공유 데이터에 JVM 잠금은 서버가 한 대(이중화해도 Active-Standby 라 한 대만 처리)임이 보장될 때만 쓰고, 그 이유를 주석에 남긴다. 보장 없이 지금 한 대라는 이유로 쓰면 서버를 늘리는 날 조용히 깨진다.
 - 런타임이 Java 21~23 이면 `synchronized` 안에서 파일, DB, 네트워크 호출과 `Thread.sleep`, `Object.wait` 를 하지 않는다. 가상 스레드가 캐리어 스레드를 붙잡는다(pinning). 그런 일을 잠가야 하면 `ReentrantLock` 이다. Java 24 이상은 `synchronized` 가 캐리어를 붙잡지 않으니(JEP 491) 이 이유로 바꾸지 않는다.
 
 ### 체크리스트
@@ -35,9 +35,9 @@ Accepted
 - [ ] 싱글턴 빈에 요청마다 바뀌는 가변 필드가 없다
 - [ ] `@Async`, `CompletableFuture` 가 정해진 실행기를 쓴다
 - [ ] `InterruptedException` 을 잡고 아무것도 안 하는 `catch` 가 없다
-- [ ] 공유 상태에 원자 타입·잠금과 이유 주석이 있다
+- [ ] 공유 상태에 원자 타입·동시성 컬렉션·잠금과 이유 주석이 있다
 - [ ] 바깥 호출에 시간 제한이 있다
-- [ ] 여러 서버가 같이 쓰는 데이터를 JVM 잠금으로 지키지 않는다(DB 잠금이나 원자적 생성)
+- [ ] 여러 서버가 같이 쓰는 데이터를 JVM 잠금으로 지키지 않는다(DB 잠금이나 원자적 생성). 서버 한 대(Active-Standby 포함)가 보장돼 JVM 잠금을 쓴 자리는 이유 주석이 있다
 - [ ] (Java 21~23) `synchronized` 블록 안에 파일, DB, 네트워크 호출과 `sleep`, `wait` 가 없다
 
 ### 안티패턴
@@ -50,7 +50,7 @@ Accepted
 | `catch (InterruptedException e) {}` | `Thread.currentThread().interrupt();` 후 끝내거나 던진다 |
 | 시간 제한 없는 HTTP 호출 | 연결·읽기 시간 제한 설정 |
 | (Java 21~23) `synchronized (this) { Files.write(...); }` | `lock.lock(); try { Files.write(...); } finally { lock.unlock(); }` |
-| `synchronized` 로 DB 채번이나 "한 건만 처리" 를 지키기 | 행 잠금(`SELECT ... FOR UPDATE SKIP LOCKED`), 유일 제약, 원자적 생성 |
+| 서버 한 대 보장 없이 `synchronized` 로 DB 채번이나 "한 건만 처리" 를 지키기 | 행 잠금(`SELECT ... FOR UPDATE SKIP LOCKED`), 유일 제약, 원자적 생성 |
 
 ## 다른 언어에서
 

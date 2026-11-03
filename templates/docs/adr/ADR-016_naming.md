@@ -26,18 +26,19 @@ Accepted
 - 불리언은 참·거짓으로 읽히게: `isPaid`, `hasCoupon`, `canRetry`. 부정형(`isNotValid`)은 피한다.
 - 뭉뚱그린 이름을 쓰지 않는다: `Manager`, `Helper`, `Util`, `Common`, `Base`, `Processor`, `Data`, `Info`, `Handler`, `Dto`, `Vo` 를 끝에 붙인 타입. 하는 일이 하나로 말해지지 않으면 나눈다(`OrderManager` → `OrderCanceller`, `OrderPriceCalculator`). 이름의 끝 단어만 본다(`BaseEntity` 는 끝이 `Entity` 라 된다).
   - 예외: 프레임워크 계약을 구현하는 타입은 그 계약 이름을 쓴다. `Processor` 는 배치 `ItemProcessor` 구현, `Handler` 는 프레임워크가 부르는 콜백 구현(예외 처리기 등)만 된다.
+  - 이벤트·메시지 리스너가 넘기는 처리기는 무엇을 처리하는지 이름 앞에 밝힌 `XxxHandler`(예: `OrderPlacedHandler`)도 된다(ADR-001 의 Listener → Handler).
 - 층 사이를 오가는 값은 용도를 이름에 단다: API 요청 `XxxRequest`, API 응답 `XxxResponse`, 쓰기 입력 `XxxCommand`, 조회 조건 `XxxCondition`, API 로 나가지 않는 서비스 반환값 `XxxResult`.
 - 서비스 빈(`@Service`)은 `Service` 로 끝난다. 유스케이스 서비스는 업무 이름(`{대상}{업무}Service`)이고, 집합 하나의 쓰기와 읽기를 나누면 `XxxCommandService`, `XxxQueryService` 다.
 - 메서드 동사가 층과 없을 때의 결과를 말한다.
   - 저장소 포트의 읽기는 `find` 다. 없을 수 있으면 `Optional` 이나 빈 컬렉션을 돌려준다(ADR-009).
   - 서비스의 읽기는 `get` 이다. 없으면 사유 예외를 던진다(ADR-006). 이름만 보고 없을 때 무엇이 오는지 안다.
-  - 쓰기는 `save`, `update`, `delete` 다. 상태를 바꾸는 업무 동작은 엔티티의 뜻 있는 메서드다(`order.cancel()`).
+  - 저장소 포트의 쓰기는 `save`, `update`, `delete` 다. 서비스의 쓰기는 업무 동사다(`placeOrder`, `cancelOrder`). 상태를 바꾸는 업무 동작은 엔티티의 뜻 있는 메서드다(`order.cancel()`).
   - 조건 객체를 받으면 `...By` 로 끝난다(`findAllBy(condition)`).
-  - 바깥 호출을 감싸 실패를 값이나 사유 예외로 바꾸는 메서드는 `try` 로 시작한다.
+  - 바깥 호출을 감싼 메서드도 이름은 맡은 업무를 말한다. 실패가 값인지 예외인지는 반환 타입(`Optional`, 결과 타입)과 ADR-006 이 말한다.
   - Spring Data 리포지토리 인터페이스의 메서드는 그 문법을 따르고 위 규칙 밖이다.
 - 약어를 만들지 않는다. 누구나 아는 것(`id`, `url`, `http`)만 쓴다. 한 글자 이름은 짧은 반복 변수(`i`)와 람다 인자 정도에만.
 - 업무 용어를 하나로 통일한다(유비쿼터스 언어). 같은 개념을 화면·코드·DB·문서에서 같은 낱말로 부르고, 프로젝트 용어집(`docs/` 아래)에 적는다. 다른 개념에는 다른 낱말을 쓴다.
-- 이름에 타입이나 구현을 넣지 않는다: `orderList` 보다 `orders`, `strName` 보다 `name`, `IOrderRepository`/`OrderRepositoryImpl` 같은 접두·접미어 대신 역할 이름(`JpaOrderRepository`).
+- 이름에 타입이나 구현을 넣지 않는다: `orderList` 보다 `orders`, `strName` 보다 `name`, `IOrderRepository`/`OrderRepositoryImpl` 같은 접두·접미어 대신 역할 이름을 쓴다. 포트를 구현하는 어댑터는 기술 이름을 앞에 붙여도 된다(`JpaOrderRepository`) - 같은 포트의 구현이 기술로 갈리기 때문이다.
 - 숫자 상수에는 뜻 있는 이름을 붙인다(ADR-003).
 - 테스트 이름은 무엇을 확인하는지 말한다(ADR-012).
 - 대소문자 표기와 파일 이름 규칙은 그 언어·프레임워크의 관례를 따른다.
@@ -45,14 +46,15 @@ Accepted
 ### 체크리스트
 
 - [ ] `data`, `info`, `temp`, `obj`, `tmp` 같은 뜻 없는 변수·필드 이름이 없다
-- [ ] `Manager`/`Helper`/`Util`/`Common`/`Base`/`Data`/`Info`/`Dto`/`Vo` 로 끝나는 새 타입이 없다(`Processor`, `Handler` 는 프레임워크 계약 구현만)
+- [ ] `Manager`/`Helper`/`Util`/`Common`/`Base`/`Data`/`Info`/`Dto`/`Vo` 로 끝나는 새 타입이 없다(`Processor`, `Handler` 는 프레임워크 계약 구현만. 리스너가 넘기는 처리기는 `OrderPlacedHandler` 처럼 처리 대상을 앞에 밝힌 `Handler` 가 된다)
 - [ ] 층 사이 값이 `Request`/`Response`/`Command`/`Condition`/`Result` 로 용도를 말한다
 - [ ] `@Service` 클래스가 `Service` 로 끝난다
 - [ ] 포트 읽기는 `find`(Optional, 빈 컬렉션), 서비스 읽기는 `get`(없으면 사유 예외)이다
+- [ ] 포트 쓰기는 `save`/`update`/`delete`, 서비스 쓰기는 업무 동사(`placeOrder`)다
 - [ ] 불리언이 `is`/`has`/`can` 꼴로 읽힌다
 - [ ] 새로 만든 약어가 없다
 - [ ] 같은 개념에 두 낱말을 쓰지 않는다(용어집과 맞다)
-- [ ] 이름에 타입·구현 표시(`List`, `Impl`, `I` 접두어)가 없다
+- [ ] 이름에 타입·구현 표시(`List`, `Impl`, `I` 접두어)가 없다(어댑터 구현 앞의 기술 이름 `Jpa` 등은 된다)
 
 ### 안티패턴
 

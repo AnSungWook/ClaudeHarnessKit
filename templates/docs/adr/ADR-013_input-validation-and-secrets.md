@@ -27,7 +27,7 @@ Accepted
   - 업무 규칙 위반은 업무 사유 예외로(ADR-006). 값 객체 생성자 검사는 프로그래밍 오류 방어용이다(ADR-002).
   - 외부 시스템이 준 값도 입력이다. 어댑터에서 검사한다.
 - 주입 방지: SQL·쿼리는 매개변수 바인딩으로만 만든다. 사용자 값을 쿼리·명령·경로 문자열에 이어 붙이지 않는다.
-- 오류 노출: 클라이언트에 스택, 예외 클래스 이름, SQL, 내부 메시지를 보이지 않는다. 오류 응답은 한 모양(코드, 사람이 읽는 메시지, 추적용 ID)으로 통일하고, 자세한 것은 서버 로그에 남긴다(ADR-011).
+- 오류 노출: 클라이언트에 스택, 예외 클래스 이름, SQL, 내부 메시지를 보이지 않는다. 오류 응답은 한 모양(코드, 사람이 읽는 메시지, 추적용 ID)으로 통일하고, 그 모양의 정본은 ADR-023 이다. 자세한 것은 서버 로그에 남긴다(ADR-011).
 - 비밀값:
   - 코드, 저장소에 커밋되는 설정 파일, 테스트 고정값에 두지 않는다. 배포 환경(환경변수, 비밀 관리 서비스)에서 받는다.
   - 받는 자리는 설정 객체 한 곳이다(ADR-003). 코드 곳곳에서 `System.getenv` 를 부르지 않는다.
@@ -50,7 +50,7 @@ Accepted
 |---------|-----------|
 | 서비스마다 `if (req.email() == null) throw ...` | 요청 타입의 `@NotBlank @Email` + `@Valid` |
 | `"select * from orders where id = " + id` | 매개변수 바인딩 |
-| 오류 응답 `{"error": e.getMessage(), "trace": ...}` | `{"code": "ORDER_NOT_FOUND", "message": "...", "traceId": "..."}` |
+| 오류 응답 `{"error": e.getMessage(), "trace": ...}` | ADR-023 의 공통 오류 본문(`errorCode`, `errorMessage`, `traceId`) |
 | `application.yml` 에 `password: admin123` 커밋 | `${DB_PASSWORD}` + 배포 환경에서 주입 |
 | `String key = System.getenv("API_KEY");` 를 여러 클래스에서 | 설정 record 한 곳에서 받고 검증 |
 
@@ -73,4 +73,4 @@ Accepted
 ## References
 
 - 출처: [affaan-m/everything-claude-code rules/java/security.md](https://github.com/affaan-m/everything-claude-code/blob/main/rules/java/security.md), [affaan-m/everything-claude-code java-reviewer.md](https://github.com/affaan-m/everything-claude-code/blob/main/agents/java-reviewer.md), [github/awesome-copilot springboot.instructions.md](https://github.com/github/awesome-copilot/blob/main/instructions/springboot.instructions.md)
-- ADR-002, ADR-003, ADR-006, ADR-011
+- ADR-002, ADR-003, ADR-006, ADR-011, ADR-023(오류 본문 모양)

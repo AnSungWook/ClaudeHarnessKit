@@ -28,16 +28,18 @@ Accepted
   1. 로그: `@Slf4j`
   2. 접근자와 표시: `@Getter`, `@ToString`, `@EqualsAndHashCode`
   3. 생성자: `@RequiredArgsConstructor`, `@NoArgsConstructor`
-  4. 실행 범위와 트랜잭션: `@Transactional`, `@StepScope`, `@JobScope`
+  4. 실행 범위: `@StepScope`, `@JobScope`(`@Transactional` 은 클래스가 아니라 서비스 메서드에 둔다, ADR-014)
   5. 그 정체에 딸린 설정: `@RequestMapping`, `@Table`, `@ConfigurationProperties`
   6. 정체: `@Service`, `@Repository`, `@Component`, `@RestController`, `@Configuration`, `@Entity`
 
 ```java
 @Slf4j
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Service
 public class OrderQueryService {
+
+    @Transactional(readOnly = true)
+    public OrderResult getOrder(long orderId) {
 ```
 
 - 멤버도 같은 원칙이다. 비동기 이벤트 수신은 `@Async` 다음 줄에 `@EventListener`. 스코프가 있는 빈은 `@StepScope` 다음 줄에 `@Bean`. 요청 record 칸은 검증 어노테이션 다음 줄에 `@JsonProperty`. `@Override` 는 맨 아래, 선언 바로 위다.
@@ -48,7 +50,9 @@ public class OrderQueryService {
 
 - 일반 클래스는 위에서 아래로 상수, 필드, 생성자, 정적 팩토리, public 메서드, 중첩 타입 순이다.
 - 각 public 바로 아래에 그 메서드가 부르는 private 을 부르는 순서대로 둔다. 여러 public 이 같이 쓰는 private 은 처음 부르는 public 아래에 둔다. 파일 끝에 private 을 몰아 두지 않는다.
-- 엔티티는 종류별 자리를 고정한다. 필드, private 생성자, 검증, 정적 팩토리, 연관 할당, 상태 변경, 판단(`is...`), 계산된 값, 변환(`to...`) 순이다.
+- 엔티티는 종류별 자리를 고정한다. 필드, 정적 팩토리, 연관 할당, 상태 변경, 판단(`is...`), 계산된 값, 도메인 값 변환(`to...`) 순이다.
+  - 이 순서는 public 멤버끼리의 순서다. 각 public 밑에 그것이 부르는 private(private 생성자, 검증 메서드 포함)을 두는 위 규칙이 먼저다.
+  - `to...` 는 다른 도메인 값으로 바꾸는 것만이다. 응답으로 바꾸는 `toResponse()` 는 엔티티에 두지 않는다(ADR-002).
 - 포매터의 정렬(arrangement)은 상수, 필드, 생성자, 중첩 타입 자리만 맞추고 메서드는 정렬 규칙에서 뺀다. 메서드 자리는 사람이 지킨다(ADR-007).
 - 새로 쓰거나 고친 클래스부터 따른다. 순서만 바꾸는 커밋을 기능 커밋과 섞지 않는다.
 
@@ -58,6 +62,9 @@ public class OrderQueryService {
 - [ ] `@Override` 가 선언 바로 위다
 - [ ] 한 저장소 안에서 테스트 어노테이션 순서가 한 모양이다
 - [ ] private 메서드가 그것을 처음 부르는 public 아래에 있다(파일 끝에 몰려 있지 않다)
+- [ ] 엔티티도 private 이 그것을 부르는 public 아래에 있고, 엔티티 자리 순서는 public 멤버끼리 맞는다
+- [ ] 엔티티의 `to...` 가 도메인 값 변환뿐이다(`toResponse()` 가 없다)
+- [ ] `@Transactional` 이 클래스가 아니라 서비스 메서드에 있다
 
 ### 안티패턴
 
@@ -87,4 +94,4 @@ public class OrderQueryService {
 
 ## References
 
-- ADR-007(코드 모양, 바꾼 줄만), ADR-008(생성자 주입), ADR-010(주석)
+- ADR-002(엔티티의 응답 변환 금지), ADR-007(코드 모양, 바꾼 줄만), ADR-008(생성자 주입), ADR-010(주석), ADR-014(트랜잭션은 서비스 메서드에)

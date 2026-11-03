@@ -39,7 +39,7 @@ Accepted
 
 - [ ] 도메인·서비스 단위 테스트가 애플리케이션 컨텍스트를 띄우지 않는다
 - [ ] 도메인 객체·값을 목으로 바꾸지 않는다
-- [ ] `verify` 만 있고 결과 단언이 없는 테스트가 없다
+- [ ] `verify` 만 있고 결과 단언이 없는 테스트가 없다(호출 자체가 계약인 경우 - 외부로 한 번만 보냄 등 - 는 `verify` 만으로 된다)
 - [ ] 테스트에 `Thread.sleep` 이 없다
 - [ ] 기대값을 대상 코드로 계산하지 않는다
 
@@ -47,10 +47,10 @@ Accepted
 
 | 안티패턴 | 올바른 패턴 |
 |---------|-----------|
-| 서비스 하나 보려고 전체 컨텍스트 테스트 | `new OrderService(fakePort, fixedClock)` |
+| 서비스 하나 보려고 전체 컨텍스트 테스트 | `new OrderPlacementService(fakePort, fixedClock)` |
 | `when(order.total()).thenReturn(...)`(값 객체 목) | 진짜 `Order` 를 만든다 |
 | `verify(repository).save(any())` 만 | 저장된 값이나 돌려준 결과를 단언 |
-| `assertEquals(price * qty, result)` | `assertEquals(Money.of(3000), result)` |
+| `assertEquals(price * qty, result)` | `assertEquals(new Money(3000), result)` |
 | `Thread.sleep(2000)` 뒤 확인 | `await().atMost(...).until(...)` |
 
 ## 다른 언어에서
