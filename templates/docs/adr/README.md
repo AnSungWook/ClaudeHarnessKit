@@ -54,7 +54,7 @@ ADR(Architecture Decision Record)은 **왜 이 결정을 했는가**를 기록�
 | [ADR-020](ADR-020_modern-language-idioms.md) | 같은 일은 최신 문법 한 모양으로 - 결과 순회는 스트림, `switch` 식은 default 없이 전부, 패턴 매칭, sealed 와 record |
 | [ADR-021](ADR-021_annotation-and-member-order.md) | 정체 어노테이션은 선언 바로 위, 멤버는 public 하나 밑에 그것이 부르는 private |
 | [ADR-022](ADR-022_http-error-boundary.md) | HTTP 오류는 처리기 한 자리가 매핑 표 하나로 상태와 본문을 정하고, 모르는 예외는 고정 문구만 낸다. 컨트롤러는 바꾸고, 한 번 부르고, 바꾼다 |
-| [ADR-023](ADR-023_readable-flow.md) | 입구에서 실제 일을 하는 클래스까지 세 번 안에 닿게 - 아는 프레임워크 모양을 드러내고, 부가 처리는 한 자리에, 흐름을 함수 객체로 숨기지 않는다 |
+| [ADR-023](ADR-023_readable-flow.md) | 흐름은 입구에서 바로 따라갈 수 있게 - 표준 구조를 드러내고, 이름 있는 메서드를 직접 부르고, 부가 관심사 하나에 클래스 하나, 위임만 하는 층은 두지 않는다 |
 
 ## 파일 네이밍
 
