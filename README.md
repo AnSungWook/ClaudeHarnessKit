@@ -9,10 +9,13 @@ ADR 은 프로젝트 초기에 잡혀 있어야 코드 품질이 잡힌다. 이�
 |---|---|
 | `templates/docs/adr/` | 공통 ADR-001 ~ ADR-023, 템플릿 ADR-000, 목록 `README.md` |
 | `templates/docs/adr/examples/` | ADR 예시 코드(ADR-001 배치 실행 흐름 등) |
+| `templates/docs/adr/checks/` | 기계로 판정할 수 있는 ADR 을 빌드에서 막는 견본(ArchUnit, Checkstyle, commitlint) |
 | `templates/CLAUDE.md.template` | 세션이 ADR-001 부터 읽게 하는 프로젝트 `CLAUDE.md` 뼈대 |
-| `setup.sh` | 위 둘을 프로젝트에 까는 스크립트 |
+| `setup.sh` | `docs/adr/`(예시, 검사 견본 포함)와 `CLAUDE.md` 템플릿을 프로젝트에 까는 스크립트 |
 
 **ADR-001(사람이 따라 읽을 수 있게)이 나머지의 전제다.** 코드를 누가 짜든(사람이든 AI 든) 결국 사람이 읽고 확인한다.
+
+공통 ADR 은 어느 프로젝트에나 걸리는 **설계 원칙과, 어디서나 쓸 기본 구현 선택**(설정 배치, 패키지 배치, 오류 응답 본문, 커밋 모양 등)을 든다. 그 밖의 프로젝트 구현 규격(DB 접근, 오류 본문 밖의 API 계약, 관측 등)이나 기본 선택을 바꾸는 결정은 공통 ADR 을 적용한 뒤 그 프로젝트에서 정해 `ADR-024` 부터 쓴다. 다 지키기 어려우면 `templates/docs/adr/README.md` 의 「지키는 순서」 1단계부터 지킨다.
 
 ## 까는 법
 
