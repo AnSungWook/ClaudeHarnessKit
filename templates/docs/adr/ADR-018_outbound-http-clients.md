@@ -72,3 +72,4 @@ Accepted
 
 - ADR-003(설정 객체), ADR-005(바깥 어댑터), ADR-006(사유 예외), ADR-012(테스트), ADR-015(바깥 호출 시간 제한)
 - OpenFeign 같은 선언형 클라이언트는 클라이언트 수가 많고 그 의존을 들일 수 있는 프로젝트에서 이 ADR 을 고쳐 고를 수 있다.
+- 예시: [examples/018-outbound-http-clients](examples/018-outbound-http-clients/README.md) - 바른 모양(good)과 어긋난 모양(bad)

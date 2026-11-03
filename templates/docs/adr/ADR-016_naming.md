@@ -90,3 +90,4 @@ Accepted
 
 - 출처: [affaan-m/everything-claude-code rules/common/coding-style.md](https://github.com/affaan-m/everything-claude-code/blob/main/rules/common/coding-style.md)(Naming Conventions), [PatrickJS/awesome-cursorrules rules/clean-code.mdc](https://github.com/PatrickJS/awesome-cursorrules/blob/main/rules/clean-code.mdc)(Meaningful Names), [github/awesome-copilot code-review-generic.instructions.md](https://github.com/github/awesome-copilot/blob/main/instructions/code-review-generic.instructions.md)
 - ADR-003(상수 이름), ADR-007(바꾼 줄만), ADR-012(테스트 이름)
+- 예시: [examples/016-naming](examples/016-naming/README.md) - 바른 모양(good)과 어긋난 모양(bad)

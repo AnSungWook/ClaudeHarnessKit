@@ -1,0 +1,5 @@
+# 바깥으로 나가는 주소는 여기서 모두 덮는다. 안 덮으면 기본 파일의 운영 주소로 나간다.
+# 비밀값(api-key)은 로컬에서도 환경변수나 gitignore 한 application-local-mine.yaml 로 넣는다.
+order:
+  payment:
+    base-url: http://localhost:18080

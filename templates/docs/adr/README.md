@@ -91,10 +91,24 @@ ADR-{NNN}_{slug}.md
 - `ADR-002_static-factory-and-ownership.md`
 - `ADR-024_jpa-by-default.md` (프로젝트 결정)
 
-예시 코드는 `examples/` 에 두고 이름을 `ADR-` 로 시작하지 않는다(ADR 로 읽히지 않게).
+## 예시
+
+ADR 마다 `examples/<번호>-<slug>/` 에 짧은 예시가 있다. 폴더 이름은 `ADR-` 로 시작하지 않는다(ADR 로 읽히지 않게).
+
+```text
+examples/014-transaction-boundary/
+  README.md     무엇을 보여 주나, 바른 모양, 어긋난 모양, 무엇이 다른가(체크리스트 줄), 기계 검사, 공개 참고
+  good/*.java   ADR 에 맞는 모양. 그 ADR 의 핵심 구간만, 나머지 ADR 도 지킨다
+  bad/*.java    흔히 나오는 어긋난 모양. 어긋난 줄에 `// ADR-NNN 위반: ...`
+```
+
+- 각 ADR 의 References 끝에 그 예시 링크가 있다.
+- 예시는 그 ADR 을 보여 주는 **단락만** 담는다(파일 하나 10~25줄). package·import 는 적지 않고, 요점과 상관없는 멤버는 `// ...` 로 줄인다. 그대로 빌드되는 프로젝트가 아니며 예시 밖 타입은 이름으로만 나온다.
+- 프로젝트별 ADR(024~)에도 같은 모양으로 예시를 둔다.
 
 ## 쓰는 법
 
 - 프로젝트 `CLAUDE.md` 가 이 폴더를 가리키고, 세션은 일하기 전에 ADR-001 부터 읽는다(`CLAUDE.md` 템플릿에 그 절이 있다).
+- 코드를 짜거나 리뷰할 때 그 일에 닿는 ADR 의 `examples/` 를 같이 본다. good 모양을 따르고 bad 모양이 보이면 고친다.
 - 리뷰는 바뀐 파일을 각 ADR 의 체크리스트와 대조하고, 어긴 것은 막는 지적으로 낸다.
 - 새 규칙은 먼저 ADR 로 쓴다. ADR 이 없는 규칙은 리뷰 기준이 아니다.

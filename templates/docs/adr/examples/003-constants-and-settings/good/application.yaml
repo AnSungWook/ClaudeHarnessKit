@@ -1,0 +1,13 @@
+# 기본 파일이 운영 값이다. 환경마다 다른 값만 application-{env}.yaml 이 덮는다.
+spring:
+  profiles:
+    # 프로파일을 빠뜨린 기동이 운영 주소로 나가지 않게 기본은 local 이다. 배포는 SPRING_PROFILES_ACTIVE 로 준다.
+    active: local
+
+order:
+  payment:
+    base-url: https://pay.example.com
+    api-key: ${ORDER_PAYMENT_API_KEY}
+    timeout:
+      connect: 2s
+      read: 5s

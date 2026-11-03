@@ -1,0 +1,11 @@
+feat(order): 결제 전 주문을 회원이 취소하는 창구를 더한다
+
+회원이 결제 전 주문을 고객센터를 거치지 않고 취소할 수 있게 한다. 취소할 수 있는지는
+OrderStatus 가 판단하고, 환불 요청은 커밋 뒤 리스너가 보내 취소가 롤백되면 환불도 안 나간다.
+
+검증:
+- ./gradlew :order:test 통과(새 테스트 4건: 결제 전 취소, 결제 후 409, 없는 주문 404, 커밋 뒤 환불 요청)
+- SonarQube blocker 0, critical 0, major 0
+- 통합 테스트 :order:integrationTest 는 안 함 - 로컬에 DB 컨테이너가 없어 CI 에서 본다
+
+Co-Authored-By: Coding Agent <agent@example.com>

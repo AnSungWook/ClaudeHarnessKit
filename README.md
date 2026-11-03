@@ -8,7 +8,7 @@ ADR 은 프로젝트 초기에 잡혀 있어야 코드 품질이 잡힌다. 이�
 | 자리 | 내용 |
 |---|---|
 | `templates/docs/adr/` | 공통 ADR-001 ~ ADR-023, 템플릿 ADR-000, 목록 `README.md` |
-| `templates/docs/adr/examples/` | ADR 예시 코드(ADR-001 배치 실행 흐름 등) |
+| `templates/docs/adr/examples/` | ADR 마다 짧은 예시(`README.md`, `good/`, `bad/`). AI 와 사람이 "이 모양이 이 ADR 에 맞는다" 를 알아보게 |
 | `templates/docs/adr/checks/` | 기계로 판정할 수 있는 ADR 을 빌드에서 막는 견본(ArchUnit, Checkstyle, commitlint) |
 | `templates/CLAUDE.md.template` | 세션이 ADR-001 부터 읽게 하는 프로젝트 `CLAUDE.md` 뼈대 |
 | `setup.sh` | `docs/adr/`(예시, 검사 견본 포함)와 `CLAUDE.md` 템플릿을 프로젝트에 까는 스크립트 |

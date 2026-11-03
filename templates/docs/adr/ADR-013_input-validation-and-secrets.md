@@ -74,3 +74,4 @@ Accepted
 
 - 출처: [affaan-m/everything-claude-code rules/java/security.md](https://github.com/affaan-m/everything-claude-code/blob/main/rules/java/security.md), [affaan-m/everything-claude-code java-reviewer.md](https://github.com/affaan-m/everything-claude-code/blob/main/agents/java-reviewer.md), [github/awesome-copilot springboot.instructions.md](https://github.com/github/awesome-copilot/blob/main/instructions/springboot.instructions.md)
 - ADR-002, ADR-003, ADR-006, ADR-011, ADR-023(오류 본문 모양)
+- 예시: [examples/013-input-validation-and-secrets](examples/013-input-validation-and-secrets/README.md) - 바른 모양(good)과 어긋난 모양(bad)

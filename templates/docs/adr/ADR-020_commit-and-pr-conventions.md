@@ -86,3 +86,4 @@ Accepted
 - [Conventional Commits](https://www.conventionalcommits.org/)
 - ADR-007(바꾼 줄만 고친다 - 모양만 바꾼 커밋을 기능 커밋과 섞지 않는다)
 - ADR-001(흐름 글은 사람이 따라 읽을 수 있는지 판정하는 근거)
+- 예시: [examples/020-commit-and-pr-conventions](examples/020-commit-and-pr-conventions/README.md) - 바른 모양(good)과 어긋난 모양(bad)

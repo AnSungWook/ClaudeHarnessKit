@@ -95,3 +95,4 @@ public class OrderQueryService {
 ## References
 
 - ADR-002(엔티티의 응답 변환 금지), ADR-007(코드 모양, 바꾼 줄만), ADR-008(생성자 주입), ADR-010(주석), ADR-014(트랜잭션은 서비스 메서드에)
+- 예시: [examples/022-annotation-and-member-order](examples/022-annotation-and-member-order/README.md) - 바른 모양(good)과 어긋난 모양(bad)

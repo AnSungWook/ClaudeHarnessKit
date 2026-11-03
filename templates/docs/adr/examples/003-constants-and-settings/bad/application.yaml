@@ -1,0 +1,17 @@
+# ADR-003 위반: spring.profiles.active 가 없다 - 프로파일을 빠뜨린 기동이 운영 값으로 뜬다
+order:
+  # ADR-003 위반: 일반 값을 ${X:기본} 으로 숨겨 환경마다 무엇이 다른지 저장소에서 안 보인다
+  payment-base-url: ${PAYMENT_BASE_URL:https://pay.example.com}
+  # ADR-003 위반: 비밀값에 빈 기본값
+  payment-api-key: ${ORDER_PAYMENT_API_KEY:}
+  # ADR-003 위반: 형제 키가 payment-, -timeout 을 되풀이한다(payment.timeout.connect 로 올린다)
+  payment-connect-timeout: 2s
+  payment-read-timeout: 5s
+---
+# ADR-003 위반: 한 파일을 --- 와 on-profile 로 나눈다(환경마다 파일 하나)
+spring:
+  config:
+    activate:
+      on-profile: local
+order:
+  payment-base-url: http://localhost:18080

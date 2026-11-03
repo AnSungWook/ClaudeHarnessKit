@@ -74,3 +74,4 @@ Accepted
 
 - 출처: [affaan-m/everything-claude-code java-coding-standards](https://github.com/affaan-m/everything-claude-code/blob/main/skills/java-coding-standards/SKILL.md), [affaan-m/everything-claude-code java-reviewer.md](https://github.com/affaan-m/everything-claude-code/blob/main/agents/java-reviewer.md), [obra/superpowers writing-good-tests.md](https://github.com/obra/superpowers/blob/main/skills/test-driven-development/writing-good-tests.md), [github/awesome-copilot code-review-generic.instructions.md](https://github.com/github/awesome-copilot/blob/main/instructions/code-review-generic.instructions.md)
 - ADR-003(Clock), ADR-005(포트), ADR-008(생성자 주입)
+- 예시: [examples/012-test-scope-and-doubles](examples/012-test-scope-and-doubles/README.md) - 바른 모양(good)과 어긋난 모양(bad)

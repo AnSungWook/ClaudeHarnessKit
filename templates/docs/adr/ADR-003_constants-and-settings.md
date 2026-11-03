@@ -97,3 +97,4 @@ Accepted
 ## References
 
 - ADR-002 정적 팩토리와 책임
+- 예시: [examples/003-constants-and-settings](examples/003-constants-and-settings/README.md) - 바른 모양(good)과 어긋난 모양(bad)

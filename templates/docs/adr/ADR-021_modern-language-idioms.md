@@ -77,3 +77,4 @@ Accepted
 ## References
 
 - ADR-001(흐름이 보이는지), ADR-002(enum 안의 판단), ADR-007(바꾼 줄만), ADR-009(불변), ADR-011(로그 문구), ADR-013(SQL 바인딩)
+- 예시: [examples/021-modern-language-idioms](examples/021-modern-language-idioms/README.md) - 바른 모양(good)과 어긋난 모양(bad)

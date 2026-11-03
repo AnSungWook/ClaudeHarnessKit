@@ -1,0 +1,14 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"                                # ADR-019 위반: env, heapdump, beans 까지 모든 운영 엔드포인트를 연다
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: -1                             # ADR-019 위반: 상한을 풀어 업로드 크기를 막지 않는다(확장자 허용 목록도 없다)
+      max-request-size: -1
+
+auth:
+  internal-token: ${INTERNAL_TOKEN:local-token}   # ADR-019 위반(ADR-003, ADR-013 도): 비밀값에 기본값이 있어 env 가 빠져도 그 값으로 뜬다
