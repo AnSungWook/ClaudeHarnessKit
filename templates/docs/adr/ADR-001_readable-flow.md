@@ -46,7 +46,7 @@ Accepted
 
 | 안티패턴 | 올바른 패턴 |
 |---------|-----------|
-| `stream(runs.report(key), response)`, `slot.claim()` | `reportJobService.runAndWriteProgress(targetKey, response)`, `job.rejectIfAlreadyRunningAndMarkStarted()` |
+| `stream(runs.report(key), response)`, `slot.claim()` | `reportJobService.startReportJobAndWriteResult(targetKey, resultLines)`, `runningFlag.markStartedOrReject()` |
 | 람다를 든 실행 객체를 돌려주고 위로 돌아가 다른 자리에서 실행 | 그 단계에서 이름 있는 메서드를 부른다. 미뤄야 하면 이름 있는 작업(`sendReceiptTask`)이나 이벤트로 |
 | `DataChanged` 이벤트와 `onEvent` 리스너 | `OrderPlacedEvent` 와 `sendReceiptOnOrderPlaced` |
 | 층마다 `process()`, `handle()`, `execute()` | 층마다 하는 일(`validateTarget`, `startReportJob`, `writeResultLine`) |
@@ -74,3 +74,4 @@ Accepted
 - Robert C. Martin, *Clean Code* 2장 "의미 있는 이름", 3장 "함수"(내려가기 규칙)
 - John Ousterhout, *A Philosophy of Software Design* 의 "얕은 모듈", "좋은 이름 고르기"
 - ADR-002, ADR-005, ADR-014(커밋 뒤 리스너), ADR-015(실행기), ADR-016(이름), ADR-020(흐름 글), ADR-021(선언적 문법)
+- 예시: [API 로 배치 잡을 실행하는 흐름](examples/readable-flow-batch.md) - 읽기 어려운 모양과 따라 읽히는 모양, 공개 참고 코드(Spring Batch 공식 샘플, spring-petclinic)
