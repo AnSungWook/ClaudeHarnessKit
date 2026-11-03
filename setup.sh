@@ -1,5 +1,5 @@
 #!/bin/bash
-# 공통 ADR 을 프로젝트에 깐다. 프로젝트 루트에서 실행한다: bash /path/to/ClaudeHarnessKit/setup.sh
+# 공통 ADR 을 프로젝트에 깐다. 프로젝트 루트에서 실행한다: bash /path/to/adr-starter/setup.sh
 #   docs/adr/        ADR 전체와 예시(이미 있으면 건드리지 않는다)
 #   CLAUDE.md        없을 때만 템플릿을 둔다. 세션이 ADR-001 부터 읽게 하는 자리다
 set -e
