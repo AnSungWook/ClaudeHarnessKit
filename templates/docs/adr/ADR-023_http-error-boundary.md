@@ -22,14 +22,13 @@ Accepted
 
 **사유 예외를 HTTP 상태와 본문으로 바꾸는 일은 공통 처리기 한 자리가 아래 표 하나로 한다.**
 
-- 오류 본문은 공통 응답 본문 하나다(예: `CommonResponse`, 오류는 `error{errorCode, errorMessage}`, 칸 검증은 `errors[]{field, reason}`). 성공 응답도 같은 본문으로 감싼다. `errorCode`, `errorMessage` 는 사유 예외가 든 ErrorCode 의 `getCode()`, `getMessage()` 다(ADR-006).
+- 오류 본문은 공통 응답 본문 하나다(예: `CommonResponse`, 오류는 `error{errorCode, errorMessage}`, 칸 검증은 `errors[]{field, reason}`, 오류 응답이면 둘 다 최상위에 `traceId`). 성공 응답도 같은 본문으로 감싼다. `errorCode`, `errorMessage` 는 사유 예외가 든 ErrorCode 의 `getCode()`, `getMessage()` 다(ADR-006). `traceId` 는 그 요청의 추적용 ID 로, 서버 로그에 남는 값과 같다(ADR-011). 오류 본문 모양의 정본은 이 ADR 이다(ADR-013, ADR-019 가 여기를 가리킨다).
 - 모듈은 자기 사유 예외를 공통 형제(ADR-006)에 붙여 매핑을 얻는다. 모듈마다 처리기를 따로 두지 않는다.
 - 매핑은 이 표 하나다.
 
-  | 예외 | 상태 | 본문 | 로그 |
+  | 예외 | 상태 | 본문 | 로그(기본값, 아래 참고) |
   |---|---|---|---|
   | 요청 칸 검증(바인딩, 메서드 검증, 빠진 인자와 헤더, 못 읽는 본문, 타입이 안 맞는 값, 모르는 코드값), `InvalidValueException` | 400 | `errors[]`(칸, 사유) | WARN |
-  | `IllegalArgumentException`(값 객체 생성자의 검증, ADR-002) | 400 | 고정 code `INVALID_VALUE` 와 고정 문구. 예외 문구는 싣지 않는다 | WARN(예외 문구) |
   | `ForbiddenException` | 403 | `error` | WARN |
   | `NotFoundException` | 404 | `error` | WARN |
   | `ConflictException`(중복과 상태 충돌) | 409 | `error` | WARN |
@@ -38,10 +37,11 @@ Accepted
   | 그 밖 전부 | 500 | 고정 code, 고정 문구 | ERROR(스택) |
 
 - `NullPointerException` 은 따로 매핑하지 않아 500 이다. 필수 칸은 요청 검증이 먼저 400 으로 막으므로, 안쪽까지 온 null 은 코드의 버그다.
+- 값 객체 생성자의 `IllegalArgumentException`(ADR-002)도 따로 매핑하지 않아 500(고정 code, 고정 문구)이다. 사용자 입력은 경계 검증이 먼저 사유 예외(400)로 막으므로, 안쪽까지 온 불변 조건 위반은 프로그래밍 오류다. 예외 문구는 응답에 싣지 않는다.
 - 모르는 예외는 고정 code 와 고정 문구로만 응답한다. 원인과 스택은 로그에만 남긴다(ADR-013). 인증 필터의 401 도 같은 본문으로 낸다(ADR-019).
-- 로그는 이 처리기에서 한 번 남긴다(ADR-011). 업무 4xx 와 503 은 WARN, 처리하지 못한 500 은 ERROR 다.
+- 로그는 이 처리기에서 한 번 남긴다(ADR-011). 수준은 HTTP 상태만으로 고정하지 않고 ADR-011 의 뜻을 따른다. 표의 로그 칸은 기본값이다 - 요청자가 고칠 실패와 스스로 복구되는 실패는 WARN, 사람의 조치가 필요한 실패(설정이나 데이터가 틀려 계속 나는 503·409 같은)는 상태가 4xx·503 이어도 ERROR, 처리하지 못한 500 은 ERROR 다.
 - 컨트롤러에서 `ResponseStatusException` 을 던지지 않는다. 사유 예외를 던지고 처리기가 바꾼다.
-- 형식 검증은 요청 record 의 Bean Validation 과 인자의 `@Valid` 로 한다. `@RequestParam`, `@PathVariable` 에도 제약을 단다. 업무 검증은 서비스가 사유 예외로 한다.
+- 형식 검증은 요청 record 의 Bean Validation 과 인자의 `@Valid` 로 한다. `@RequestParam`, `@PathVariable` 에도 제약을 단다. 업무 검증은 서비스가 도메인의 검증 메서드를 불러 하고, 검증 판단과 사유 예외는 도메인이 든다(ADR-005).
   - 요청 record 의 필수 칸(코드값 enum 칸 포함)에는 `@NotNull` 이나 `@NotBlank` 를 달고, 선택 칸에는 달지 않는다.
   - Spring 6.1 이상이면 컨트롤러 클래스에 `@Validated` 를 달지 않는다. 메서드 검증이 내장이고, 달면 AOP 검증이 먼저 돌아 처리기가 받는 예외 타입이 갈린다.
 - 컨트롤러 메서드는 요청을 바꾸고, 서비스를 한 번 부르고, 응답으로 바꾼다. 분기와 판단을 두지 않는다(ADR-002).
@@ -53,7 +53,9 @@ Accepted
 - [ ] `@RestControllerAdvice`(또는 같은 일을 하는 처리기)가 저장소에 하나다
 - [ ] 컨트롤러에 `ResponseStatusException` 이 없다
 - [ ] 500 응답 본문에 예외 메시지, 클래스 이름, 스택이 없다(고정 문구)
-- [ ] `IllegalArgumentException` 의 문구가 응답에 실리지 않는다
+- [ ] `IllegalArgumentException` 의 문구가 응답에 실리지 않는다(값 객체 생성자 위반은 500 고정 문구)
+- [ ] 오류 본문에 `traceId` 가 있고 로그에 남는 추적 ID 와 같다
+- [ ] 로그 수준이 HTTP 상태만이 아니라 ADR-011 의 뜻을 따른다(사람의 조치가 필요하면 ERROR)
 - [ ] 요청 record 의 필수 칸에 `@NotNull`·`@NotBlank`, `@RequestParam`·`@PathVariable` 에 제약이 있다
 - [ ] 컨트롤러 메서드에 분기나 판단이 없다(바꾸고, 한 번 부르고, 바꾼다)
 - [ ] 컨트롤러가 엔티티나 도메인 값을 그대로 내지 않는다
@@ -66,7 +68,7 @@ Accepted
 | 컨트롤러마다 `@RestControllerAdvice(assignableTypes = XController.class)` | 공통 처리기 하나와 매핑 표 하나 |
 | `throw new ResponseStatusException(HttpStatus.NOT_FOUND, "order " + id)` | `throw new OrderNotFoundException(id)`(→ `NotFoundException` → 404) |
 | 500 본문에 `e.getMessage()` | 고정 code·고정 문구, 원인은 ERROR 로그 |
-| 컨트롤러에서 `if (req.amount() <= 0) return badRequest()` | 요청 record 의 `@Positive`, 업무 규칙은 서비스의 사유 예외 |
+| 컨트롤러에서 `if (req.amount() <= 0) return badRequest()` | 요청 record 의 `@Positive`, 업무 규칙은 서비스가 부르는 도메인 검증 메서드의 사유 예외 |
 | 서비스에서 잡아 `log.error` 하고 다시 던지고, 처리기에서 또 `log.error` | 처리기 한 자리에서 한 번 |
 | 엔티티를 그대로 JSON 으로 | 응답 DTO 로 바꿔 낸다 |
 

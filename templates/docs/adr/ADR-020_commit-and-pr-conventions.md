@@ -40,10 +40,10 @@ Accepted
 
     ```text
     POST /orders → orderController.placeOrder(request)
-      orderService.placeOrder(command)
+      orderPlacementService.placeOrder(command)
         stock.reserve(items)            재고 부족이면 OutOfStockException(409)
         orders.save(order)
-        events.publishEvent(OrderPlacedEvent.of(order))
+        events.publishEvent(new OrderPlacedEvent(order.id()))
     커밋 뒤 → receiptListener.sendReceiptOnOrderPlaced(event)   mailExecutor 에서
     ```
 - 머지 커밋 제목은 도구가 만든 그대로 둔다.
