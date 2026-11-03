@@ -4,14 +4,7 @@
 
 ## ADR이란?
 
-ADR(Architecture Decision Record)은 **왜 이 결정을 했는가**를 기록하는 문서다.
-`docs/standards/`가 "어떻게 해야 하는가(How)"를 정의한다면, ADR은 "왜 이렇게 결정했는가(Why)"를 기록한다.
-
-| | docs/standards/ | docs/adr/ |
-|---|---|---|
-| 성격 | 규칙 (How) | 결정 기록 (Why) |
-| 변경 빈도 | 거의 불변 | 계속 추가 |
-| 예시 | "API는 항상 snake_case" | "ADR-008: snake_case 채택 (이유: 기존 시스템 호환)" |
+ADR(Architecture Decision Record)은 **무엇을 정했고 왜 그렇게 정했는가**를 기록하는 문서다. 결정과 함께 리뷰에서 쓰는 체크리스트와 안티패턴을 든다.
 
 ## 기본 ADR (공통 코드 설계)
 
@@ -66,10 +59,12 @@ ADR-{NNN}_{slug}.md
 
 예시:
 - `ADR-002_static-factory-and-ownership.md`
-- `ADR-008_jpa-by-default.md`
+- `ADR-024_jpa-by-default.md` (프로젝트 결정)
 
-## 규칙 전파 연동
+예시 코드는 `examples/` 에 두고 이름을 `ADR-` 로 시작하지 않는다(ADR 로 읽히지 않게).
 
-- `/propagate-convention` 스킬과 `convention-keeper` 에이전트는 ADR을 **규칙의 단일 원본(Single Source of Truth)**으로 사용한다
-- 새 규칙을 에이전트/스킬에 전파하려면 **먼저 ADR을 생성**해야 한다
-- ADR이 없는 규칙은 전파되지 않는다
+## 쓰는 법
+
+- 프로젝트 `CLAUDE.md` 가 이 폴더를 가리키고, 세션은 일하기 전에 ADR-001 부터 읽는다(`CLAUDE.md` 템플릿에 그 절이 있다).
+- 리뷰는 바뀐 파일을 각 ADR 의 체크리스트와 대조하고, 어긴 것은 막는 지적으로 낸다.
+- 새 규칙은 먼저 ADR 로 쓴다. ADR 이 없는 규칙은 리뷰 기준이 아니다.
