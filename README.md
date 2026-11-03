@@ -1,4 +1,4 @@
-# Claude Harness Kit
+# adr-starter
 
 새 프로젝트를 시작할 때 까는 **공통 코드 설계 결정(ADR)** 모음이다.
 ADR 은 프로젝트 초기에 잡혀 있어야 코드 품질이 잡힌다. 이미 굳은 코드에 나중에 걸면 잘 안 바뀐다.
@@ -22,7 +22,7 @@ ADR 은 프로젝트 초기에 잡혀 있어야 코드 품질이 잡힌다. 이�
 프로젝트 루트에서 Git Bash(또는 bash)로 실행한다.
 
 ```bash
-bash /path/to/ClaudeHarnessKit/setup.sh
+bash /path/to/adr-starter/setup.sh
 ```
 
 - `docs/adr/` 가 없으면 ADR 과 예시를 통째로 복사한다. 있으면 건드리지 않는다.
