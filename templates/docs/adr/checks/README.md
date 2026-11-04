@@ -17,7 +17,6 @@
 | | **(관례)** 입구 어노테이션(`@Scheduled`, `@Schedules`, `@KafkaListener(s)`, `@RabbitListener(s)`, `@JmsListener(s)` - 완전 수식 이름 목록)이 달린 메서드·클래스, `ApplicationRunner`·`CommandLineRunner` 구현이 `adapter.in` 밖에 있음 | 017 |
 | | **(관례)** `@Aspect` 가 `..observability..` 밖에 있고 허용 목록(`ALLOWED_ASPECTS`)에도 없음 | 001 |
 | | 검사 대상 클래스가 아예 안 들어옴(위 관례 검사가 빈 집합으로 통과하는 것과 가르려고) | - |
-| `fixtures/` | 위 관례 검사가 바른 모양은 통과시키고 어긋난 모양은 잡는지 확인하는 테스트(`AdrArchitectureFixtureTest`)와 fixture 소스 | 001, 017 |
 | `checkstyle-adr.xml` | 와일드카드 import | 007 |
 | `commitlint.config.js` | 커밋 제목 `type(scope): subject`, type 목록, scope 는 영문 소문자와 하이픈, 끝 마침표. 머지 커밋 말고는 무시하지 않음 | 020 |
 
@@ -61,17 +60,13 @@ ADR 에는 원칙(무엇을 막나)만 있고, 자리·모양·허용 목록은 
   - 같은 층 안 의존(어댑터끼리 호출) - `dependenciesPointInward` 도 못 잡는다
 - 관례 검사는 대상이 없으면 통과한다(`allowEmptyShould(true)`). 그래서 `applicationClassesAreImported` 가 검사 대상 클래스가 아예 안 들어오는 경우(기본 패키지를 잘못 적음)를 따로 잡는다.
 
-### fixture 테스트
+### 검사를 고쳤을 때 확인하는 법
 
-`fixtures/src/test/java/` 를 프로젝트의 `src/test/java/` 에 그대로 복사하면 `AdrArchitectureFixtureTest` 가 관례 검사를 바른 모양(`fixture.good`)과 어긋난 모양(`fixture.bad.*`)에 돌린다. 상수(자리, 목록)를 바꿨을 때 검사가 여전히 맞게 도는지 확인하는 용도다.
+검증용 fixture 는 킷에 두지 않는다. 검사 코드를 고쳤으면 임시 Gradle 프로젝트에 이 파일과 바른·어긋난 모양 몇 개를 만들어 돌려 보고 버린다. 남기는 것은 결과 한 줄이고, 그 기록은 해당 예시 README 의 「기계 검사」 절에 둔다(ADR-001 은 [examples/001-readable-flow](../examples/001-readable-flow/README.md)).
 
-- 바른 모양은 빈 집합을 실패로 보고(`allowEmptyShould(false)`) 돌린다 - 대상이 하나도 안 잡혀 그냥 통과하는 것을 막는다.
-- 어긋난 모양은 실패 메시지에 기대한 클래스·메서드가 있는지까지 본다 - 다른 이유로 실패해 통과하는 것을 막는다(예: 상속 fixture 는 부모를 바른 자리에 두고 자식만 걸리게 했다).
-- 다루는 모양: 서비스 안 리스너, 합성 어노테이션 리스너, 상속한 `ApplicationListener`, 생명주기 리스너 다섯 모양(매개변수, 어노테이션 값, 어노테이션 값 + 넓은 매개변수, 속성 없는 합성 어노테이션에 고정한 값, 타입 인자)과 예외를 주면 안 되는 두 모양(별칭 아닌 합성 속성, 별칭으로 고정값 덮어쓰기), 스케줄 트리거(단일, 반복 선언), 클래스 수준 수신 선언(직접, 합성, 반복 선언), 명령행 입구, 애스펙트(관측 자리, 허용 목록), 대체 배치(`..listener..` 를 고른 저장소).
-- 클래스 수준 수신 선언은 메시지 라이브러리를 필수 의존으로 만들지 않으려고 fixture 용 어노테이션(`fixture.FixtureMessageListener`, 반복 선언 컨테이너 `FixtureMessageListeners`)으로 확인한다. 실제 라이브러리 어노테이션은 같은 판정 코드에 이름만 다르게 들어간다.
-- fixture 는 테스트 소스라 `AdrArchitectureTest` 의 기본 검사(`DoNotIncludeTests`)에는 안 들어간다.
-- 필요한 의존: `spring-context`, `spring-tx`, `spring-boot`, `aspectjweaver`(또는 `aspectjrt`). Spring Boot 프로젝트면 이미 있다.
-- 확인한 환경: Spring Boot 4.1.2, ArchUnit 1.3.0, Java 21 에서 fixture 테스트 14개와 기본 검사 16개 통과(2026-11-04).
+- 바른 모양은 빈 집합을 실패로 보고(`.allowEmptyShould(false)`) 돌린다 - 대상이 하나도 안 잡혀 그냥 통과하는 것을 막는다.
+- 어긋난 모양은 실패 메시지에 기대한 클래스가 있는지까지 본다 - 다른 이유로 실패해 통과하는 것을 막는다.
+- 규칙이 자리·목록을 받는 팩토리라, fixture 용 어노테이션이나 다른 배치로도 같은 판정을 확인할 수 있다.
 
 ## Checkstyle (와일드카드 import)
 
