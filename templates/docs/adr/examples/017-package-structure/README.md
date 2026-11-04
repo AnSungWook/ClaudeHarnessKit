@@ -18,7 +18,7 @@
 
 - [`bad/tree.md`](bad/tree.md) - `order/api/`, `order/web/`, 한 폴더에 섞인 서비스·엔티티·설정, `persistence/` 안의 객체 변환 `PaymentMapper`, `common/util/`.
 - [`bad/PaymentCreationService.java`](bad/PaymentCreationService.java) - 결제 서비스가 주문의 `adapter/out/persistence` 엔티티와 리포지토리를 바로 쓴다.
-- [`bad/PaymentJpaEntity.java`](bad/PaymentJpaEntity.java) - 판단에 쓰지도 않는 다른 기능 엔티티에 `@ManyToOne` 을 걸고 `@Getter` 로 연다.
+- [`bad/PaymentJpaEntity.java`](bad/PaymentJpaEntity.java) - 다른 기능 엔티티에 `@ManyToOne` 을 걸고 `@Getter` 로 연다.
 
 ## 무엇이 다른가
 
@@ -27,11 +27,11 @@
 | `order/api/` 에 공개 값과 입구 | 공개 값은 `order/domain/`, 입구는 `order/application/port/in/` | 뭉뚱그린 폴더 이름(`api`, `common`, `util` 등)이 없다 |
 | `order/` 한 폴더에 `OrderService`, `OrderJpaEntity`, `OrderConfig` | `application/service`, `adapter/out/persistence`, `config` 로 나눔 | 한 폴더에 컨트롤러·설정·엔티티·서비스가 섞여 있지 않다 |
 | 결제 서비스가 `OrderJpaRepository`, `OrderJpaEntity` import | `GetOrderSummaryUseCase` 와 `OrderSummary` 만 import | 다른 기능의 `adapter`, 영속 엔티티, `service` 구현을 import 하지 않는다 |
-| `@ManyToOne OrderJpaEntity order` + `@Getter` | `long orderId` 키 칸 | 다른 기능 엔티티는 키 칸으로 들고, 연관이 있으면 판단에 쓰는 것이며 getter 가 없다 |
+| `@ManyToOne OrderJpaEntity order` + `@Getter` | `long orderId` 키 칸 | 다른 기능 엔티티는 키 칸으로만 들고, 연관도 상대 표와 잇는 쿼리도 없다 |
 | `persistence/PaymentMapper`(객체 변환 클래스) | `PaymentJpaEntity.of(payment)` | `persistence/` 의 매퍼가 SQL 매퍼뿐이고 객체 변환 Mapper 클래스가 없다 |
 | `common/util/DateUtil` | 주인 기능으로 옮기고 진짜 공용만 `shared/` | 뭉뚱그린 폴더 이름이 없다 |
 
-- 연관이 정말 필요한 경우(내 엔티티의 메서드가 상대 값으로 판단)에도 키 칸은 그대로 두고, 연관은 `insertable = false, updatable = false` 로 같은 컬럼을 읽기만 하며 getter 를 두지 않는다. 이 예시는 그 경우를 다루지 않는다.
+- 내 엔티티의 메서드가 주문 값으로 판단해야 하는 경우에도 연관을 걸지 않는다. 서비스가 주문 `port/in` 에서 그 값을 받아 메서드 인자로 넘긴다. 여러 결제와 주문을 짝 지어 판단하면 그 짝은 일급 컬렉션이 든다(ADR-002).
 - 기존 저장소가 다른 배치(예: 성격별 최상위)를 골랐다면 판정 기준은 그 배치다. 이 트리는 새 저장소의 기본 배치다.
 
 ## 기계 검사

@@ -30,6 +30,22 @@ Accepted
   - 사용자 입력이 틀린 경우(요청 값 검증)는 경계(요청 검증, 서비스 입구)에서 먼저 걸러 업무 사유 예외로 낸다(ADR-006). 생성자의 범용 예외에 기대어 사용자에게 오류를 보이지 않는다.
 - 같은 조립이 두 자리에 있으면 팩토리 하나로 모은다.
 - 인자가 많을 때는 함께 다니는 인자 묶음이 업무 단위인지 본다. 같은 묶음이 여러 메서드를 같이 다니고 그 값으로 하는 판단·계산이 있으면 그 이름의 record 로 묶고 판단을 record 메서드로 옮긴다. 인자 수만 맞추려는 껍데기 묶음은 만들지 않는다.
+- 원시 타입을 값 객체로 감싸는 것도 같다. 검증, 형식 바꾸기, 계산, 판단 같은 규칙이 있을 때만 감싼다. 칸만 담은 값 객체는 만들지 않는다. 다른 빈이 있어야 하는 판단(등록돼 있는지 등)은 값 객체가 아니라 서비스가 맡는다.
+- **판단이 붙는 목록은 일급 컬렉션으로 둔다.** `List<X>` 를 그대로 돌리지 않고 그 목록을 든 record 에 합계, 거르기, 비었는지 같은 판단을 메서드로 둔다. 판단이 없는 목록은 `List` 그대로다 - 감싸기만 한 일급 컬렉션은 껍데기 값 객체와 같다.
+  - 따로 읽어 온 두 목록(다른 기능의 값을 키 목록으로 받은 것, ADR-017)을 짝 지어 쓰면, 짝 맞추기와 짝이 없을 때의 처리, 그 짝으로 하는 판단을 그 묶음의 일급 컬렉션이 든다. 서비스는 읽고, 묶음을 만들고, 묶음의 메서드를 부른다.
+
+```java
+// 전: 짝 맞추기와 판단이 서비스에 풀려 있다
+Map<Long, Category> categories = categoryUseCase.findByIds(categoryIdsOf(orders)).stream()
+        .collect(toMap(Category::id, identity()));
+List<Order> refundable = orders.stream()
+        .filter(o -> categories.get(o.categoryId()) != null && categories.get(o.categoryId()).refundable())
+        .toList();
+
+// 후: 서비스는 흐름만, 짝과 판단은 일급 컬렉션 안
+OrdersWithCategory orders = OrdersWithCategory.of(orderList, categoryUseCase.findByIds(categoryIdsOf(orderList)));
+List<Order> refundable = orders.refundable();
+```
 
 ```java
 // 전: 서비스가 상태를 정하고 인자를 밀어 넣는다
@@ -49,6 +65,8 @@ return OrderResult.of(order, payment, clock);
 - [ ] 같은 조립이 두 자리 이상에 풀려 있지 않다
 - [ ] 값 객체 생성자(또는 팩토리)가 불변 조건을 검사한다
 - [ ] 사용자 입력 오류는 생성자 예외가 아니라 경계의 사유 예외로 나간다
+- [ ] 값 객체와 일급 컬렉션에 규칙(검증, 계산, 판단)이 있다 - 칸만 감싼 것이 없다
+- [ ] 따로 읽은 두 목록의 짝 맞추기와 판단이 서비스가 아니라 묶음 타입 안에 있다
 
 ### 안티패턴
 
@@ -60,6 +78,8 @@ return OrderResult.of(order, payment, clock);
 | 빌더로 필수 필드를 채움 | 팩토리·생성자 인자로 필수 필드를 컴파일 때 강제 |
 | 엔티티의 `toResponse()` | 응답 타입의 `of(entity)` - 엔티티가 화면을 모르게 |
 | 인자 수만 줄이려는 값 없는 묶음 record | 판단·계산을 함께 가진 업무 단위 record |
+| `record OrderId(long value) {}` 처럼 칸만 감싼 값 객체 | 규칙이 없으면 `long` 그대로, 규칙이 생기면 그때 감싼다 |
+| 서비스마다 `Map` 을 만들어 `map.get(o.categoryId())` 로 짝 맞추고 null 검사 | 묶음 일급 컬렉션의 `of(...)` 와 판단 메서드 |
 
 ## 다른 언어에서
 
@@ -81,5 +101,6 @@ return OrderResult.of(order, payment, clock);
 ## References
 
 - ADR-005 헥사고날 층과 의존 방향
+- ADR-009 일급 컬렉션의 없음은 빈 객체, ADR-017 다른 기능 값은 키 목록으로 받아 서비스가 조합
 - 기계 검사 예: 아키텍처 테스트로 생성 인자 안의 삼항·문자열 연결·계산을 잡는다
 - 예시: [examples/002-static-factory-and-ownership](examples/002-static-factory-and-ownership/README.md) - 바른 모양(good)과 어긋난 모양(bad)

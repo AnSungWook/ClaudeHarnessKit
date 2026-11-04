@@ -7,7 +7,7 @@ public class PaymentJpaEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 주문은 다른 기능의 엔티티다. 이 엔티티가 주문 값으로 판단할 일이 없어 연관 대신 키 칸만 든다.
+    // 주문은 다른 기능의 엔티티라 연관 없이 키 칸만 든다. 주문 값이 필요하면 서비스가 주문 port/in 에서 받는다.
     private long orderId;
 
     // ...
