@@ -57,7 +57,7 @@ ADR(Architecture Decision Record)은 **무엇을 정했고 왜 그렇게 정했�
 
 | ADR | 결정 |
 |---|---|
-| [ADR-001](ADR-001_readable-flow.md) | **먼저 본다.** 코드의 주인이 입력을 받은 자리부터 이름만 보고 각 단계가 무슨 일을 하는지 따라갈 수 있게 짠다 |
+| [ADR-001](ADR-001_readable-flow.md) | **먼저 본다.** 코드의 주인이 입력을 받은 자리부터 이름만 보고 각 단계가 무슨 일을 하는지 따라갈 수 있게 짠다. 응답 전에 끝나야 하는 일은 명시적 호출, 이벤트는 실패해도 요청 결과를 안 바꾸는 후속 일에만, 동작을 바꾸는 AOP 는 적용 자리에 표시가 보이게 |
 | [ADR-002](ADR-002_static-factory-and-ownership.md) | 판단이 드는 값은 그 타입의 정적 팩토리로 만들고, 판단은 그 클래스가 다 가진다(판단 없는 값은 생성자). 서비스는 흐름만. 잘못된 값은 만들어질 수 없다 |
 | [ADR-003](ADR-003_constants-and-settings.md) | 상수와 설정값은 한 자리에서 만들고 해석한다(`@Value` 금지, 코드값 enum, 시각은 `Clock`). 기본 파일이 운영 값, 환경 파일이 덮고, 기본 프로파일 `local`, 비밀값만 기본값 없는 env |
 | [ADR-004](ADR-004_no-nested-types.md) | 중첩 타입은 업무가 실제로 겹칠 때만 쓴다 |
@@ -73,7 +73,7 @@ ADR(Architecture Decision Record)은 **무엇을 정했고 왜 그렇게 정했�
 | [ADR-014](ADR-014_transaction-boundary.md) | 트랜잭션은 응용 서비스에 두고, 그 안에서 바깥을 부르지 않는다 |
 | [ADR-015](ADR-015_concurrency-basics.md) | 공유 상태를 두지 않고, 스레드는 정해진 풀에서, 중단을 삼키지 않는다. JVM 잠금은 JVM 안 상태에만(서버 한 대가 보장되면 이유 주석과 함께 예외) |
 | [ADR-016](ADR-016_naming.md) | 이름은 뜻을 드러내고(Manager·Util 금지, 약어 금지), 업무 용어 하나로 통일한다. 값은 용도 접미사, 저장소 포트는 `find`(Optional)·`save`, 서비스는 `get`(없으면 예외)과 업무 동사 |
-| [ADR-017](ADR-017_package-structure.md) | 패키지는 기능별로 나누고 그 안은 성격별 폴더(`domain`, `application/port`, `application/service`, `adapter/in`, `adapter/out`, `config`)로 고정한다. 리팩토링 범위에 패키지 정렬이 기본으로 들어간다. 새 저장소의 기본 배치이고, 기존 저장소는 문서에 고른 배치를 따른다 |
+| [ADR-017](ADR-017_package-structure.md) | 패키지는 기능별로 나누고 그 안은 성격별 폴더(`domain`, `application/port`, `application/service`, `adapter/in`, `adapter/out`, `config`)로 고정한다. 바깥에서 실행을 시작시키는 입구는 인바운드 어댑터 폴더에만. 리팩토링 범위에 패키지 정렬이 기본으로 들어간다. 새 저장소의 기본 배치이고, 기존 저장소는 문서에 고른 배치를 따른다 |
 | [ADR-018](ADR-018_outbound-http-clients.md) | 바깥 HTTP 는 클라이언트 한 종류로 어댑터 안에서만 부르고, 타임아웃은 클라이언트마다 적으며, 재시도는 멱등 호출에만 건다 |
 | [ADR-019](ADR-019_auth-boundary-and-security-defaults.md) | 인증은 한 자리가 들고, 보안 기본값은 닫힌 쪽이다(명시한 CORS, 좁힌 Actuator, 업로드 상한, 리다이렉트 제한) |
 | [ADR-020](ADR-020_commit-and-pr-conventions.md) | 커밋 제목은 `type(scope): subject`, 본문과 PR 은 왜와 돌린 검증(안 한 검증 포함)을 든다 |
