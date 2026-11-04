@@ -10,7 +10,7 @@ com/example/
 │   │   └── OrderReader.java
 │   ├── web/                                      ADR-017 위반: 고른 배치에 없는 폴더 이름(adapter/in/web 자리)
 │   │   └── OrderController.java
-│   ├── OrderService.java                         ADR-017 위반: 서비스, 엔티티, 설정이 한 폴더에 섞여 있다
+│   ├── OrderService.java                         ADR-017 위반: 서비스, 엔티티, 설정이 한 폴더에 섞여 있다. 안에 @Scheduled 와 @EventListener 메서드까지 있다(입구는 adapter/in)
 │   ├── OrderJpaEntity.java
 │   ├── OrderJpaRepository.java
 │   └── OrderConfig.java
