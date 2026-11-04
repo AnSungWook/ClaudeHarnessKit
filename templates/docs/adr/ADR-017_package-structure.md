@@ -35,16 +35,21 @@ Accepted
 │   ├── adapter/
 │   │   ├── in/
 │   │   │   ├── web/               # 컨트롤러, 요청·응답 DTO (ADR-005, ADR-013)
-│   │   │   └── batch/, message/   # 배치 잡, 메시지 수신 등 다른 입구
+│   │   │   ├── event/             # 이벤트 수신 리스너 - 유스케이스에 넘기기만 (ADR-001)
+│   │   │   ├── schedule/          # 스케줄 실행을 받는 트리거 메서드
+│   │   │   └── batch/, message/   # 배치 잡 실행 입구, 메시지 수신 등 다른 입구
 │   │   └── out/
 │   │       ├── persistence/       # 영속 엔티티, 리포지토리·SQL 매퍼, out 포트 구현
 │   │       └── client/            # 외부 API 호출, out 포트 구현
-│   └── config/                    # 그 기능의 빈 조립, 설정 객체 (ADR-003)
+│   └── config/                    # 그 기능의 빈 조립, 설정 객체 (ADR-003), 잡 정의·스케줄러 실행기 조립
 └── shared/                        # 여러 기능이 같이 쓰는 것만. 최소로 유지
 ```
 
 - **폴더 이름은 고른 배치의 이름만 쓴다(기본 배치면 위 목록).** `api`, `common`, `util`, `helper`, `manager`, `etc`, `impl`, `core` 를 기능 안 폴더 이름으로 쓰지 않는다(ADR-016). 특히 `api` 는 HTTP API 로 읽히므로, 모듈이 공개하는 입구는 `application/port/in`, 공개하는 값은 `domain` 에 둔다.
 - **한 폴더에는 한 성격만.** 기본 배치라면 컨트롤러는 `adapter/in/web` 에만, 설정은 `config` 에만, 영속 엔티티는 `adapter/out/persistence` 에만 둔다. 섞이면 위반이다.
+- **바깥에서 실행을 시작시키는 입구는 고른 배치에서 인바운드 어댑터 역할을 하는 폴더에만 둔다(기본 배치면 `adapter/in/*`).** HTTP 요청, 스케줄 실행, 메시지 수신, 이벤트 수신, 명령행 Runner 가 입구다. "이 앱이 언제 무엇을 시작하나" 를 그 폴더만 보고 알게 한다(ADR-001 「서비스에 안 보이는 흐름」).
+  - 잡이나 스케줄러를 **조립하는** 설정(잡 정의 빈, 스케줄러 실행기, 리스너 컨테이너 설정)은 `config` 에, 실행을 **받는** 쪽(`@Scheduled` 트리거 메서드, 잡 실행 입구, 리스너 메서드)은 인바운드 어댑터에 둔다.
+  - 입구는 받은 것을 유스케이스에 넘기기만 한다. 다른 기능의 이벤트를 받는 리스너도 그 이벤트 타입은 발행한 기능의 `domain` 에서 import 한다.
 - **아래 경로(`application/port/in`, `adapter/out/persistence` 등)는 기본 배치 기준이다.** 다른 배치를 고른 저장소는 같은 역할의 폴더에 같은 규칙을 적용한다(예: 성격별 최상위면 `repository/` 가 `adapter/out/persistence` 역할).
 - **`persistence/` 의 매퍼는 SQL 매퍼(MyBatis Mapper 인터페이스)만 뜻한다.** 객체를 다른 객체로 바꾸는 Mapper 클래스는 아니고, 그런 변환은 만들어지는 타입의 `of(원본)` 이다(ADR-002).
 - **기능 사이 호출은 상대 기능의 `application/port/in` 과 `domain` 의 공개 값으로만.** 상대의 `adapter`, 영속 엔티티, `service` 구현을 import 하지 않는다. 영속 엔티티도 예외가 없다.
@@ -69,6 +74,7 @@ Accepted
 - [ ] 새 파일이 저장소가 고른 배치(기본은 위 배치)의 자리에 있다
 - [ ] 뭉뚱그린 폴더 이름(`api`, `common`, `util` 등)이 없다
 - [ ] 한 폴더에 컨트롤러·설정·엔티티·서비스가 섞여 있지 않다
+- [ ] 입구(컨트롤러, `@Scheduled` 트리거, 메시지·이벤트 리스너, Runner)가 인바운드 어댑터 역할 폴더에만 있고, 잡·스케줄러 조립은 `config` 에 있다
 - [ ] 다른 기능의 `adapter`, 영속 엔티티, `service` 구현을 어디서도 import 하지 않는다
 - [ ] 다른 기능 엔티티는 키 칸으로만 들고, 연관도 상대 표와 잇는 쿼리도 없다
 - [ ] 다른 기능 값은 서비스가 상대 `port/in` 에서 키 목록으로 한 번에 받는다(행마다 부르지 않는다)
@@ -90,6 +96,7 @@ Accepted
 | 다른 기능 엔티티에 `@ManyToOne` 을 걸고 서비스에서 `order.getCategory().getName()` | 키 칸 + 서비스가 `port/in` 에 키 목록으로 한 번 조회 |
 | 내 영속 어댑터가 `join ... on o.categoryId = c.id` 로 다른 기능 표를 잇는다 | 서비스가 상대 `port/in` 에서 키를 먼저 받고 그 키 목록으로 내 표를 읽는다 |
 | 엔티티 메서드가 판단하려고 다른 기능 엔티티에 연관을 건다 | 서비스가 판단에 쓸 값을 인자로 넘긴다 |
+| `order/application/service/OrderService` 안에 `@Scheduled` 메서드와 `@EventListener` 메서드 | 트리거는 `adapter/in/schedule`, 리스너는 `adapter/in/event` 에 두고, 각각 같은 기능의 `port/in` 을 통해 유스케이스에 넘긴다 |
 | 리팩토링 PR 에서 클래스만 고치고 폴더는 그대로 | 범위의 파일을 저장소가 고른 배치로 같이 옮긴다 |
 | `common/`, `util/` 에 아무 기능의 코드나 모음 | 주인 기능으로 옮기고, 진짜 공용만 `shared/` |
 
