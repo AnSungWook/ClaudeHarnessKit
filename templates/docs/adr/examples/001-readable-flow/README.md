@@ -98,6 +98,19 @@ POST /orders → orderController.placeOrder(request)
 리뷰가 체크리스트로 본다. 이름이 맡은 일을 말하는지는 기계로 판정할 수 없다. 층 방향(ADR-005)은 `checks/` 의 ArchUnit 규칙이 본다.
 리스너·입구의 자리와 애스펙트 허용 목록은 `checks/` 의 흐름 관례 검사가 본다(`bad/OrderChangedListeners.java` 의 자리, `bad/DiscountAdjustingAspect.java` 가 관측 자리 밖이면 걸린다). 업무 순서를 `@Order` 에 숨겼는지, 실패를 삼켰는지, 무엇을 이벤트로 넘겼는지는 리뷰가 본다.
 
+**흐름 관례 검사를 돌려 본 결과(2026-11-04, Spring Boot 4.1.2, ArchUnit 1.3.0, Java 21, 임시 프로젝트에서 확인하고 버림).** 바른 모양은 통과(빈 집합은 실패로 보고), 어긋난 모양 14가지는 기대한 클래스로 걸렸다. 기본 검사 16개도 통과.
+
+| 걸린 것 | 통과한 것 |
+|---|---|
+| 서비스 안의 리스너, 합성 어노테이션 리스너, 상속으로 구현한 `ApplicationListener`, config 밖 생명주기 리스너 | `adapter.in.event` 의 리스너, config 의 생명주기 리스너(매개변수, 어노테이션 값, 값 + 넓은 매개변수, 속성 없는 합성 어노테이션, `ApplicationListener<ApplicationReadyEvent>`) |
+| config 의 업무 리스너가 합성 어노테이션 속성으로 생명주기 예외를 얻으려 한 두 모양(별칭 아닌 `value`, `@AliasFor` 로 고정값 덮어쓰기) | |
+| 서비스 안의 `@Scheduled`(단일, 반복 선언), 서비스에 단 클래스 수준 수신 선언(직접, 합성, 반복 선언), config 의 `CommandLineRunner` | `adapter.in.schedule`, `adapter.in.message`, `adapter.in.cli` 의 입구 |
+| 관측 자리 밖이고 허용 목록에도 없는 `@Aspect` | `..observability..` 의 애스펙트, 허용 목록에 올린 애스펙트 |
+| 대체 배치(`..listener..`)를 고른 저장소에서 기본 자리에 둔 리스너 | 대체 배치 자리의 리스너 |
+
+- 클래스 수준 수신 선언은 메시지 라이브러리 없이 시험용 어노테이션으로 확인했다. 실제 `@KafkaListener` 등은 같은 판정 코드에 이름만 다르게 들어간다.
+- 합성 어노테이션 우회 두 가지를 막은 자리는 돌연변이로 확인했다 - 막은 조건을 되돌리면 그 시험만 실패했다.
+
 ## 공개 참고
 
 - Spring Batch 공식 샘플 [`OwnersExportJobConfiguration`](https://github.com/spring-projects/spring-batch/blob/main/spring-batch-samples/src/main/java/org/springframework/batch/samples/petclinic/OwnersExportJobConfiguration.java) - 잡 설정 하나에 reader, writer, step 이 이름으로 바로 보이는 모양. `good/ReportJobConfig.java` 가 따른 모양이다.
