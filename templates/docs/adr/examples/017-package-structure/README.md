@@ -25,6 +25,7 @@
 | 어긋난 모양 | 바른 모양 | 해당 체크리스트 줄 |
 |---|---|---|
 | `order/api/` 에 공개 값과 입구 | 공개 값은 `order/domain/`, 입구는 `order/application/port/in/` | 뭉뚱그린 폴더 이름(`api`, `common`, `util` 등)이 없다 |
+| `OrderService` 안의 `@Scheduled`, `@EventListener` 메서드 | `adapter/in/schedule/UnpaidOrderCancelSchedule`, `adapter/in/event/ReceiptOnOrderPlacedListener` 가 `port/in` 을 부르고, 스케줄러 실행기 조립은 `config/OrderSchedulingConfig` | 입구가 인바운드 어댑터 역할 폴더에만 있고, 잡·스케줄러 조립은 `config` 에 있다 |
 | `order/` 한 폴더에 `OrderService`, `OrderJpaEntity`, `OrderConfig` | `application/service`, `adapter/out/persistence`, `config` 로 나눔 | 한 폴더에 컨트롤러·설정·엔티티·서비스가 섞여 있지 않다 |
 | 결제 서비스가 `OrderJpaRepository`, `OrderJpaEntity` import | `GetOrderSummaryUseCase` 와 `OrderSummary` 만 import | 다른 기능의 `adapter`, 영속 엔티티, `service` 구현을 import 하지 않는다 |
 | `@ManyToOne OrderJpaEntity order` + `@Getter` | `long orderId` 키 칸 | 다른 기능 엔티티는 키 칸으로만 들고, 연관도 상대 표와 잇는 쿼리도 없다 |

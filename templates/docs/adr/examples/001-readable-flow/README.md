@@ -47,9 +47,56 @@ POST /jobs/report?targetKey=N → reportJobController.startReportJob(targetKey)
 
 포트(`ReportJobLauncher`)를 하나 건너는 것은 ADR-005 의 층 나눔 때문이다. 겹이 하나 늘어도 이름이 맡은 일을 말하므로 ADR-001 에 맞는다.
 
+## 서비스에 안 보이는 흐름: 이벤트, AOP
+
+ADR-001 「서비스에 안 보이는 흐름」 절의 장면이다. 주문 접수(`order`)와 포인트(`point`) 두 기능이다.
+
+### 바른 모양
+
+- `good/OrderPlacementService.java` - 한 메서드에서 세 갈래를 가른다. **응답 전에 끝나야 하는** 재고 예약은 inventory 의 `port/in` 을 명시적으로 부르고, **나중에라도 끝나야 하는** 배송 요청은 같은 트랜잭션에 아웃박스로 책임만 남기고, **실패해도 되는** 영수증·포인트는 사실 이벤트(`OrderPlacedEvent`, 키만)를 낸다
+- `good/ReceiptOnOrderPlacedListener.java` - 같은 기능의 커밋 뒤 실행. 커밋 뒤, 정해진 실행기에서 도는 것이 선언에 보이고, 리스너는 `SendReceiptUseCase` 에 넘기기만 한다
+- `good/PointAccrualOnOrderPlacedListener.java` - 다른 기능의 이벤트를 받는다. 리스너는 `AccruePointUseCase` 에 넘기기만 하고, **실패 경로**는 유스케이스 구현(`PointAccrualService`, 같은 파일 아래)이 든다: 실패를 삼키지 않고 재적립 배치가 읽을 자리에 기록한다. 넘겨받은 회원 키로 권한을 갈음하지 않고 유스케이스가 다시 확인한다
+- `good/RefundApprovalService.java` - 동작을 바꾸는 advice(`@PreAuthorize`, `@Transactional`)가 적용 메서드에 보인다
+- `good/ServiceTimingAspect.java` - 표시 없이 패턴으로 거는 advice 는 관측만. 인자·반환값을 안 바꾸고, 예외를 삼키지 않고, 다시 실행하지 않는다
+
+흐름 글:
+
+```text
+POST /orders → orderController.placeOrder(request)
+  placeOrderUseCase.placeOrder(command)                 @Transactional
+    reserveStock.reserveFor(items)                      응답 전에 끝나야 함 - 실패하면 주문 실패
+    orders.save(Order.place(...))
+    shippingRequests.recordFor(orderId)                 나중에라도 끝나야 함 - 아웃박스, 같은 트랜잭션
+    events.publishEvent(OrderPlacedEvent(orderId, memberKey))
+  커밋 뒤
+    receiptExecutor: sendReceipt.sendFor(orderId)       실패하면 재발송 기록
+    pointExecutor:   accruePoint.accrueFor(orderId, memberKey)   실패하면 재적립 기록
+```
+
+### 어긋난 모양
+
+- `bad/OrderPlacementService.java` - 저장 한 줄 뒤 `OrderChanged` 이벤트 하나에 재고 차감, 배송 요청, 영수증을 다 싣는다. 영속 엔티티와 요청 객체를 그대로 싣는다
+- `bad/OrderChangedListeners.java` - 서비스 폴더의 동기 리스너. 업무 순서를 `@Order` 에 숨기고, out 어댑터를 직접 부르고, 트랜잭션 안에서 바깥을 부르고, 실패를 삼킨다
+- `bad/DiscountAdjustingAspect.java` - 표시 없이 서비스 전체에 걸어 업무 결과(할인)를 바꾼다
+
+### 무엇이 다른가
+
+| 어긋난 모양 | 바른 모양 | 체크리스트 |
+|---|---|---|
+| 재고 차감을 리스너 `@Order(1)` 로 | `reserveStock.reserveFor(...)` 명시적 호출 | 응답 전에 끝나야 하는 일은 서비스가 명시적으로 부른다 |
+| 배송 요청을 리스너가 트랜잭션 안에서 바로 호출 | 같은 트랜잭션에 `shippingRequests.recordFor(...)` | 나중에라도 끝나야 하는 일은 그 책임이 업무 저장과 같은 트랜잭션에 남는다 |
+| 리스너 안의 `catch (Exception e) {}` | 커밋 뒤·정해진 실행기에서 돌고, 유스케이스가 실패를 재시도 자리에 기록하고 로그 한 번 | 리스너 실패가 요청 결과를 뒤집지 않게 실행 시점과 실패 처리가 정해져 있다 |
+| `@Order(1)`, `@Order(2)` | 순서가 필요한 일은 서비스의 호출 순서 | 꼭 지켜야 할 순서를 `@Order` 에 숨기지 않는다 |
+| `stockJpaRepository.decrease(...)`, `mailClient.send(...)` | `sendReceipt.sendFor(...)`, `accruePoint.accrueFor(...)` | 리스너는 받는 기능의 `port/in` 에 넘기고 out 어댑터를 직접 부르지 않는다 |
+| `new OrderChanged(order, command)` | `new OrderPlacedEvent(orderId, memberKey)` | 이벤트에 영속 엔티티, 요청 객체, 토큰이 없다 |
+| `execution(* ..service..*(..))` 로 결과를 바꿈 | 메서드의 `@PreAuthorize`, 패턴 advice 는 `ServiceTimingAspect` 처럼 관측만 | 동작을 바꾸는 advice 는 적용 자리에 뜻이 읽히는 표시가 있다 |
+
+`ShippingRequestOutbox`, 아웃박스 전달기, 재발송·재적립 배치, `SendReceiptUseCase` 구현은 이 예시에 이름만 나온다. 아웃박스의 전달·재시도·중복 처리 방식은 프로젝트 ADR 이 정한다.
+
 ## 기계 검사
 
 리뷰가 체크리스트로 본다. 이름이 맡은 일을 말하는지는 기계로 판정할 수 없다. 층 방향(ADR-005)은 `checks/` 의 ArchUnit 규칙이 본다.
+리스너·입구의 자리와 애스펙트 허용 목록은 `checks/` 의 흐름 관례 검사가 본다(`bad/OrderChangedListeners.java` 의 자리, `bad/DiscountAdjustingAspect.java` 가 관측 자리 밖이면 걸린다). 업무 순서를 `@Order` 에 숨겼는지, 실패를 삼켰는지, 무엇을 이벤트로 넘겼는지는 리뷰가 본다.
 
 ## 공개 참고
 
